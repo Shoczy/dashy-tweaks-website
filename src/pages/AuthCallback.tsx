@@ -9,13 +9,22 @@ export default function AuthCallback() {
     const [loginSuccess, setLoginSuccess] = useState(false)
 
     useEffect(() => {
-        // Check if this is a desktop app callback
-        const desktop = searchParams.get('desktop') === 'true'
-        const storedSessionId = localStorage.getItem('app_login_session')
-        setIsDesktop(desktop || !!storedSessionId)
+        const handleAuth = async () => {
+            // Check if this is a desktop app callback
+            const desktop = searchParams.get('desktop') === 'true'
+            const storedSessionId = localStorage.getItem('app_login_session')
+            setIsDesktop(desktop || !!storedSessionId)
 
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session) {
+            // Get the session - Supabase will parse the hash automatically
+            const { data: { session }, error } = await supabase.auth.getSession()
+
+            if (error) {
+                console.error('Auth error:', error)
+                navigate('/')
+                return
+            }
+
+            if (session) {
                 setLoginSuccess(true)
 
                 // If we have a stored session ID from desktop app login
@@ -50,8 +59,14 @@ export default function AuthCallback() {
                     // For web, redirect to dashboard
                     navigate('/dashboard')
                 }
+            } else {
+                // No session, redirect to home
+                navigate('/')
             }
-        })
+        }
+
+        // Small delay to let Supabase parse the URL hash
+        setTimeout(handleAuth, 100)
     }, [navigate, searchParams])
 
     // Desktop success view
