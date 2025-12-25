@@ -67,6 +67,10 @@ export default function AppLogin() {
     const handleLogin = async (selectedProvider: 'google' | 'discord') => {
         setStatus('loading')
         try {
+            // Store session ID for after OAuth redirect
+            if (sessionId) {
+                localStorage.setItem('app_login_session', sessionId)
+            }
             if (selectedProvider === 'google') {
                 await signInWithGoogle()
             } else {

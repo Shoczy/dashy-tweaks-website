@@ -11,16 +11,42 @@ export default function AuthCallback() {
     useEffect(() => {
         // Check if this is a desktop app callback
         const desktop = searchParams.get('desktop') === 'true'
-        setIsDesktop(desktop)
+        const storedSessionId = localStorage.getItem('app_login_session')
+        setIsDesktop(desktop || !!storedSessionId)
 
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN') {
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
                 setLoginSuccess(true)
 
-                if (desktop) {
-                    // For desktop app, show success message
-                    // User will manually return to the app
-                } else {
+                // If we have a stored session ID from desktop app login
+                if (storedSessionId) {
+                    try {
+                        // Check subscription status
+                        const { data: subscription } = await supabase
+                            .from('subscriptions')
+                            .select('plan, status')
+                            .eq('user_id', session.user.id)
+                            .single()
+
+                        const userData = {
+                            name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                            email: session.user.email,
+                            plan: subscription?.status === 'active' ? subscription.plan : 'free'
+                        }
+
+                        // Notify desktop app via API
+                        await fetch(`/api/check-login?session=${storedSessionId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user: userData })
+                        })
+
+                        // Clear the stored session
+                        localStorage.removeItem('app_login_session')
+                    } catch (e) {
+                        console.error('Failed to notify desktop app:', e)
+                    }
+                } else if (!desktop) {
                     // For web, redirect to dashboard
                     navigate('/dashboard')
                 }
