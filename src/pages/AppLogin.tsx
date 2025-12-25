@@ -11,56 +11,63 @@ export default function AppLogin() {
     const sessionId = searchParams.get('session')
 
     useEffect(() => {
-        // Check if already logged in
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                handleLoginSuccess(session.user)
+        const init = async () => {
+            // Check if already logged in
+            const { data: { session } } = await supabase.auth.getSession()
+
+            if (session && sessionId) {
+                // Already logged in and have session ID - notify desktop app immediately
+                await handleLoginSuccess(session.user, sessionId)
+            } else if (session && !sessionId) {
+                // Logged in but no session ID - just show success
+                setStatus('success')
             } else if (provider === 'google' || provider === 'discord') {
-                // Auto-start OAuth if provider specified
+                // Not logged in, auto-start OAuth if provider specified
                 handleLogin(provider)
             } else {
                 setStatus('selecting')
             }
-        })
+        }
 
-        // Listen for auth changes
+        init()
+
+        // Listen for auth changes (for OAuth callback)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' && session) {
-                handleLoginSuccess(session.user)
+            if (event === 'SIGNED_IN' && session && sessionId) {
+                handleLoginSuccess(session.user, sessionId)
             }
         })
 
         return () => subscription.unsubscribe()
-    }, [provider])
+    }, [provider, sessionId])
 
-    const handleLoginSuccess = async (user: any) => {
+    const handleLoginSuccess = async (user: any, sid: string) => {
         setStatus('success')
 
-        // If we have a session ID, notify the desktop app
-        if (sessionId) {
-            try {
-                // Check subscription status
-                const { data: subscription } = await supabase
-                    .from('subscriptions')
-                    .select('plan, status')
-                    .eq('user_id', user.id)
-                    .single()
+        // Notify the desktop app
+        try {
+            // Check subscription status
+            const { data: subscription } = await supabase
+                .from('subscriptions')
+                .select('plan, status')
+                .eq('user_id', user.id)
+                .single()
 
-                const userData = {
-                    name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                    email: user.email,
-                    plan: subscription?.status === 'active' ? subscription.plan : 'free'
-                }
-
-                // Notify desktop app via API
-                await fetch(`/api/check-login?session=${sessionId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user: userData })
-                })
-            } catch (e) {
-                console.error('Failed to notify desktop app:', e)
+            const userData = {
+                name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                email: user.email,
+                plan: subscription?.status === 'active' ? subscription.plan : 'free'
             }
+
+            // Notify desktop app via API
+            const response = await fetch(`/api/check-login?session=${sid}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: userData })
+            })
+            console.log('API response:', await response.json())
+        } catch (e) {
+            console.error('Failed to notify desktop app:', e)
         }
     }
 
