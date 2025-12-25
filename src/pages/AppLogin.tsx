@@ -15,6 +15,16 @@ export default function AppLogin() {
         checkAuth()
     }, [])
 
+    // Auto-close tab on success
+    useEffect(() => {
+        if (status === 'success') {
+            const timer = setTimeout(() => {
+                window.close()
+            }, 2000)
+            return () => clearTimeout(timer)
+        }
+    }, [status])
+
     const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession()
 
@@ -208,11 +218,17 @@ export default function AppLogin() {
                     </div>
                     <h1 className="text-2xl font-bold mb-4">Success!</h1>
                     <p className="text-neutral-400 mb-2">
-                        You can now close this tab and return to the desktop app.
+                        Authorization complete. This tab will close automatically.
                     </p>
-                    <p className="text-neutral-500 text-sm">
-                        The app will automatically sign you in.
+                    <p className="text-neutral-500 text-sm mb-6">
+                        Return to the Dashy Tweaks app.
                     </p>
+                    <button
+                        onClick={() => window.close()}
+                        className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-medium transition"
+                    >
+                        Close Tab
+                    </button>
                 </div>
             </div>
         )

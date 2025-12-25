@@ -36,13 +36,8 @@ export default async function handler(req: any, res: any) {
                 return res.status(200).json({ success: false, error: error.message })
             }
 
-            if (data) {
-                // Delete after reading (one-time use)
-                await supabase
-                    .from('app_login_sessions')
-                    .delete()
-                    .eq('session_id', session)
-
+            if (data && data.user_data) {
+                // Don't delete immediately - let it expire naturally or delete after confirmed receipt
                 return res.status(200).json({ success: true, user: data.user_data })
             }
             return res.status(200).json({ success: false })
