@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
-    process.env.VITE_SUPABASE_URL || 'https://purbzxxjgdumubhbjahf.supabase.co',
-    process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+    'https://purbzxxjgdumubhbjahf.supabase.co',
+    'sb_publishable_8yKtOy-s12i-XVQXLdq9QQ_FQ8nkJbq'
 )
 
 export default async function handler(req: any, res: any) {
@@ -29,9 +29,14 @@ export default async function handler(req: any, res: any) {
                 .from('app_login_sessions')
                 .select('user_data')
                 .eq('session_id', session)
-                .single()
+                .maybeSingle()
 
-            if (data && !error) {
+            if (error) {
+                console.error('Supabase GET error:', error)
+                return res.status(200).json({ success: false, error: error.message })
+            }
+
+            if (data) {
                 // Delete after reading (one-time use)
                 await supabase
                     .from('app_login_sessions')
@@ -41,43 +46,41 @@ export default async function handler(req: any, res: any) {
                 return res.status(200).json({ success: true, user: data.user_data })
             }
             return res.status(200).json({ success: false })
-        } catch {
-            return res.status(200).json({ success: false })
+        } catch (e: any) {
+            console.error('GET error:', e)
+            return res.status(200).json({ success: false, error: e.message })
         }
     }
 
     // POST - Store login completion
     if (req.method === 'POST') {
         const { user } = req.body || {}
-        if (user) {
-            try {
-                // Delete old session if exists
-                await supabase
-                    .from('app_login_sessions')
-                    .delete()
-                    .eq('session_id', session)
-
-                // Insert new session
-                const { error } = await supabase
-                    .from('app_login_sessions')
-                    .insert({
-                        session_id: session,
-                        user_data: user,
-                        created_at: new Date().toISOString()
-                    })
-
-                if (error) {
-                    console.error('Supabase error:', error)
-                    return res.status(500).json({ success: false, error: 'Database error' })
-                }
-
-                return res.status(200).json({ success: true })
-            } catch (e) {
-                console.error('Error:', e)
-                return res.status(500).json({ success: false, error: 'Server error' })
-            }
+        if (!user) {
+            return res.status(400).json({ success: false, error: 'Missing user data' })
         }
-        return res.status(400).json({ success: false, error: 'Missing user data' })
+
+        try {
+            // Upsert - insert or update if exists
+            const { error } = await supabase
+                .from('app_login_sessions')
+                .upsert({
+                    session_id: session,
+                    user_data: user,
+                    created_at: new Date().toISOString()
+                }, {
+                    onConflict: 'session_id'
+                })
+
+            if (error) {
+                console.error('Supabase POST error:', error)
+                return res.status(500).json({ success: false, error: error.message })
+            }
+
+            return res.status(200).json({ success: true, message: 'Session stored' })
+        } catch (e: any) {
+            console.error('POST error:', e)
+            return res.status(500).json({ success: false, error: e.message })
+        }
     }
 
     return res.status(405).json({ error: 'Method not allowed' })
