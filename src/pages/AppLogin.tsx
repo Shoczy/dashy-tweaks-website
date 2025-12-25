@@ -61,17 +61,24 @@ export default function AppLogin() {
         setIsAuthorizing(true)
 
         try {
-            // Get subscription status
+            // Get subscription status including license key
             const { data: subscription } = await supabase
                 .from('subscriptions')
-                .select('plan, status')
+                .select('plan, status, license_key, expires_at')
                 .eq('user_id', user.id)
                 .maybeSingle()
+
+            const isPremium = subscription?.status === 'active' && subscription.plan !== 'free'
 
             const userData = {
                 name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
                 email: user.email,
-                plan: subscription?.status === 'active' ? subscription.plan : 'free'
+                avatar: user.user_metadata?.avatar_url || null,
+                provider: user.app_metadata?.provider || 'email',
+                joinedAt: user.created_at,
+                plan: isPremium ? subscription.plan : 'free',
+                licenseKey: isPremium ? subscription.license_key : null,
+                expiresAt: subscription?.expires_at || null
             }
 
             // Send to API
