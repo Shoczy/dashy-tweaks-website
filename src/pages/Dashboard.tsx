@@ -168,7 +168,7 @@ export default function Dashboard() {
                 <div className="p-4 border-t border-white/5">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                         {profile?.discord_avatar ? <img src={profile.discord_avatar} className="w-10 h-10 rounded-full ring-2 ring-emerald-500/30" alt="" /> : <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-sm font-bold text-emerald-400">{profile?.username?.[0]?.toUpperCase() || 'U'}</div>}
-                        <div className="flex-1 min-w-0"><p className="font-medium text-sm text-white truncate">{profile?.username || 'User'}</p><p className={`text-xs ${isPremium ? 'text-emerald-400' : 'text-neutral-500'}`}>{isPremium ? '⭐ Premium' : 'Free'}</p></div>
+                        <div className="flex-1 min-w-0"><p className="font-medium text-sm text-white truncate">{profile?.username || user?.user_metadata?.username || 'User'}</p><p className={`text-xs ${isPremium ? 'text-emerald-400' : 'text-neutral-500'}`}>{isPremium ? '⭐ Premium' : 'No Plan'}</p></div>
                         <button onClick={handleLogout} className="p-2 text-neutral-500 hover:text-red-400 rounded-lg transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
                     </div>
                 </div>
@@ -182,8 +182,8 @@ export default function Dashboard() {
                         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-transparent border border-emerald-500/20 p-8 mb-8">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl" />
                             <div className="relative">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400 mb-4"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />{isPremium ? 'Premium Active' : 'Free Plan'}</div>
-                                <h1 className="text-3xl font-bold text-white mb-2">Welcome back, <span className="text-emerald-400">{profile?.username}</span></h1>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400 mb-4"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />{isPremium ? 'Premium Active' : 'No Plan'}</div>
+                                <h1 className="text-3xl font-bold text-white mb-2">Welcome back, <span className="text-emerald-400">{profile?.username || user?.user_metadata?.username || 'User'}</span></h1>
                                 <p className="text-neutral-400">Manage your account and optimize your gaming experience.</p>
                             </div>
                         </div>
@@ -358,7 +358,7 @@ export default function Dashboard() {
                                 <h3 className="font-semibold text-white">Profile Information</h3>
                             </div>
                             <div className="p-6 space-y-5">
-                                <div><label className="block text-sm text-neutral-400 mb-2">Username</label><input type="text" value={profile?.username || ''} readOnly className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white" /></div>
+                                <div><label className="block text-sm text-neutral-400 mb-2">Username</label><input type="text" value={profile?.username || user?.user_metadata?.username || ''} readOnly className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white" /></div>
                                 <div><label className="block text-sm text-neutral-400 mb-2">Email</label><input type="email" value={user?.email || ''} readOnly className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white" /></div>
                             </div>
                         </div>
@@ -409,7 +409,7 @@ export default function Dashboard() {
                             </div>
                             <div className="p-6 grid grid-cols-2 gap-6">
                                 <div><p className="text-sm text-neutral-500 mb-1">Member Since</p><p className="text-white font-medium">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString('de-DE') : '-'}</p></div>
-                                <div><p className="text-sm text-neutral-500 mb-1">Subscription</p><p className={`font-medium ${isPremium ? 'text-emerald-400' : 'text-neutral-400'}`}>{isPremium ? '⭐ Premium' : 'Free Plan'}</p></div>
+                                <div><p className="text-sm text-neutral-500 mb-1">Subscription</p><p className={`font-medium ${isPremium ? 'text-emerald-400' : 'text-neutral-400'}`}>{isPremium ? '⭐ Premium' : 'No Plan'}</p></div>
                                 {license && (<><div><p className="text-sm text-neutral-500 mb-1">License Type</p><p className="text-white font-medium">{license.plan === 'lifetime' ? 'Lifetime' : 'Subscription'}</p></div><div><p className="text-sm text-neutral-500 mb-1">Expires</p><p className="text-white font-medium">{license.expires_at ? new Date(license.expires_at).toLocaleDateString('de-DE') : 'Never'}</p></div></>)}
                             </div>
                         </div>

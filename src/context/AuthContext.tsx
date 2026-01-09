@@ -44,9 +44,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [license, setLicense] = useState<License | null>(null)
     const [loading, setLoading] = useState(true)
 
-    const loadUserData = async (userId: string) => {
-        const { data: profileData } = await getProfile(userId)
-        if (profileData) setProfile(profileData)
+    const loadUserData = async (userId: string, userEmail?: string, userMeta?: any) => {
+        let { data: profileData, error } = await getProfile(userId)
+
+        // If profile doesn't exist, create it
+        if (error || !profileData) {
+            console.log('Profile not found, creating...')
+            const username = userMeta?.username || userEmail?.split('@')[0] || 'User'
+            const { data: newProfile, error: createError } = await supabase
+                .from('profiles')
+                .insert({
+                    id: userId,
+                    username: username,
+                    email: userEmail || '',
+                    created_at: new Date().toISOString()
+                })
+                .select()
+                .single()
+
+            if (createError) {
+                console.error('Failed to create profile:', createError)
+                // Use fallback profile from user data
+                setProfile({
+                    id: userId,
+                    username: username,
+                    email: userEmail || '',
+                    avatar_url: null,
+                    discord_id: null,
+                    discord_username: null,
+                    discord_avatar: null,
+                    created_at: new Date().toISOString()
+                })
+            } else {
+                setProfile(newProfile)
+            }
+        } else {
+            setProfile(profileData)
+        }
 
         const { data: licenseData } = await getLicense(userId)
         if (licenseData) setLicense(licenseData)
@@ -68,7 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clearTimeout(timeout)
             setUser(session?.user ?? null)
             if (session?.user) {
-                loadUserData(session.user.id).finally(() => setLoading(false))
+                loadUserData(
+                    session.user.id,
+                    session.user.email,
+                    session.user.user_metadata
+                ).finally(() => setLoading(false))
             } else {
                 setLoading(false)
             }
@@ -81,7 +119,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setUser(session?.user ?? null)
             if (session?.user) {
-                await loadUserData(session.user.id)
+                await loadUserData(
+                    session.user.id,
+                    session.user.email,
+                    session.user.user_metadata
+                )
             } else {
                 setProfile(null)
                 setLicense(null)

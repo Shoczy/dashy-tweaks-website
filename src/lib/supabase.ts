@@ -62,29 +62,32 @@ export const unlinkDiscordAccount = async () => {
 }
 
 export const updateProfileDiscord = async (userId: string, discordData: { discord_id: string | null, discord_username: string | null, discord_avatar: string | null }) => {
-    // Make sure we have a valid session
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-        console.error('No session for profile update')
-        return { error: { message: 'Not authenticated' } }
-    }
-
-    const { data, error } = await supabase
-        .from('profiles')
-        .update({
-            ...discordData,
-            updated_at: new Date().toISOString()
+    try {
+        // Use API route with service key to bypass RLS
+        const response = await fetch('/api/discord-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId,
+                discordId: discordData.discord_id,
+                discordUsername: discordData.discord_username,
+                discordAvatar: discordData.discord_avatar
+            })
         })
-        .eq('id', userId)
-        .select()
 
-    if (error) {
-        console.error('Profile update error:', error)
-    } else {
-        console.log('Profile updated:', data)
+        const data = await response.json()
+
+        if (!data.success) {
+            console.error('Discord sync failed:', data.error)
+            return { error: { message: data.error } }
+        }
+
+        console.log('Discord synced successfully:', data.profile)
+        return { data: data.profile, error: null }
+    } catch (e: any) {
+        console.error('Discord sync error:', e)
+        return { error: { message: e.message } }
     }
-
-    return { data, error }
 }
 
 export const signInWithGoogle = async () => {
