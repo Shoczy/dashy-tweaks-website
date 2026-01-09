@@ -39,6 +39,36 @@ export const signInWithDiscord = async () => {
     return { data, error }
 }
 
+export const linkDiscordAccount = async () => {
+    const { data, error } = await supabase.auth.linkIdentity({
+        provider: 'discord',
+        options: {
+            redirectTo: `${window.location.origin}/dashboard?tab=settings`
+        }
+    })
+    return { data, error }
+}
+
+export const unlinkDiscordAccount = async () => {
+    // Get current user identities
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: { message: 'Not logged in' } }
+
+    const discordIdentity = user.identities?.find(i => i.provider === 'discord')
+    if (!discordIdentity) return { error: { message: 'Discord not linked' } }
+
+    const { error } = await supabase.auth.unlinkIdentity(discordIdentity)
+    return { error }
+}
+
+export const updateProfileDiscord = async (userId: string, discordData: { discord_id: string | null, discord_username: string | null, discord_avatar: string | null }) => {
+    const { error } = await supabase
+        .from('profiles')
+        .update(discordData)
+        .eq('id', userId)
+    return { error }
+}
+
 export const signInWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
