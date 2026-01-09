@@ -40,21 +40,15 @@ export const signInWithDiscord = async () => {
 }
 
 export const linkDiscordAccount = async () => {
-    // Store current user ID in localStorage before redirect
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-        localStorage.setItem('linking_discord_user', user.id)
-    }
-
-    // Use OAuth to get Discord data - this will redirect
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.linkIdentity({
         provider: 'discord',
         options: {
-            redirectTo: `${window.location.origin}/dashboard?tab=settings&discord_linked=true`,
-            scopes: 'identify'
+            redirectTo: `${window.location.origin}/dashboard?tab=settings`
         }
     })
     return { data, error }
+}
+return { data, error }
 }
 
 export const unlinkDiscordAccount = async () => {
