@@ -48,8 +48,6 @@ export const linkDiscordAccount = async () => {
     })
     return { data, error }
 }
-return { data, error }
-}
 
 export const unlinkDiscordAccount = async () => {
     // Get current user identities
