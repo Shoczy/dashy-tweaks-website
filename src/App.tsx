@@ -8,9 +8,8 @@ import HowToUse from './pages/HowToUse'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import Impressum from './pages/Impressum'
-import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
-import AppLogin from './pages/AppLogin'
+import Login from './pages/Login'
 
 export default function App() {
     return (
@@ -25,10 +24,10 @@ export default function App() {
                         <Route path="/privacy" element={<Privacy />} />
                         <Route path="/terms" element={<Terms />} />
                         <Route path="/impressum" element={<Impressum />} />
-                        <Route path="/auth/callback" element={<AuthCallback />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/app-login" element={<AppLogin />} />
+                        <Route path="/login" element={<Login />} />
                     </Route>
+                    {/* Dashboard without Layout (has own sidebar) */}
+                    <Route path="/dashboard" element={<Dashboard />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>
