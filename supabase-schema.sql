@@ -85,3 +85,20 @@ BEGIN
     RETURN result;
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- Blacklist table for banned users
+CREATE TABLE IF NOT EXISTS blacklist (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    discord_id TEXT UNIQUE NOT NULL,
+    discord_username TEXT,
+    reason TEXT DEFAULT 'No reason provided',
+    blacklisted_by TEXT,                   -- Discord ID of admin
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for quick lookups
+CREATE INDEX IF NOT EXISTS idx_blacklist_discord ON blacklist(discord_id);
+
+-- RLS for blacklist (service role only)
+ALTER TABLE blacklist ENABLE ROW LEVEL SECURITY;
