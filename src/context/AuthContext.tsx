@@ -59,12 +59,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     useEffect(() => {
-        // Get initial session
+        // Get initial session with timeout
+        const timeout = setTimeout(() => {
+            setLoading(false)
+        }, 3000) // Max 3 seconds loading
+
         supabase.auth.getSession().then(({ data: { session } }) => {
+            clearTimeout(timeout)
             setUser(session?.user ?? null)
             if (session?.user) {
-                loadUserData(session.user.id)
+                loadUserData(session.user.id).finally(() => setLoading(false))
+            } else {
+                setLoading(false)
             }
+        }).catch(() => {
+            clearTimeout(timeout)
             setLoading(false)
         })
 
@@ -77,10 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setProfile(null)
                 setLicense(null)
             }
-            setLoading(false)
         })
 
-        return () => subscription.unsubscribe()
+        return () => {
+            clearTimeout(timeout)
+            subscription.unsubscribe()
+        }
     }, [])
 
     // Check if premium
