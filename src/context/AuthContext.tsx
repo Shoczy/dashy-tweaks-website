@@ -45,7 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     const loadUserData = async (userId: string, userEmail?: string, userMeta?: any) => {
-        let { data: profileData, error } = await getProfile(userId)
+        console.log('Loading user data for:', userId)
+        const { data: profileData, error } = await getProfile(userId)
+        console.log('Profile loaded:', profileData, 'Error:', error)
 
         // If profile doesn't exist, create it
         if (error || !profileData) {
@@ -76,9 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     created_at: new Date().toISOString()
                 })
             } else {
+                console.log('New profile created:', newProfile)
                 setProfile(newProfile)
             }
         } else {
+            console.log('Setting profile with discord_id:', profileData.discord_id)
             setProfile(profileData)
         }
 
