@@ -50,35 +50,48 @@ export default async function handler(req: any, res: any) {
                 .limit(1)
                 .single()
 
+            // Check if user has an active license - REQUIRED for Tauri app login
+            if (!license) {
+                return res.status(200).json({
+                    success: false,
+                    error: 'No active license. Please redeem a license key on the website first.'
+                })
+            }
+
             // Check license expiry
             let isPremium = false
             let plan = 'free'
             let expiresAt = null
 
-            if (license) {
-                if (license.plan === 'lifetime') {
+            if (license.plan === 'lifetime') {
+                isPremium = true
+                plan = 'lifetime'
+            } else if (license.expires_at) {
+                const expiry = new Date(license.expires_at)
+                if (expiry > new Date()) {
                     isPremium = true
-                    plan = 'lifetime'
-                } else if (license.expires_at) {
-                    const expiry = new Date(license.expires_at)
-                    if (expiry > new Date()) {
-                        isPremium = true
-                        plan = license.plan
-                        expiresAt = license.expires_at
-                    }
+                    plan = license.plan
+                    expiresAt = license.expires_at
+                } else {
+                    return res.status(200).json({
+                        success: false,
+                        error: 'Your license has expired. Please renew on the website.'
+                    })
                 }
+            }
 
-                // Update HWID if provided
-                if (hwid && (!license.hwid || license.hwid === hwid)) {
-                    await supabase
-                        .from('licenses')
-                        .update({ hwid })
-                        .eq('id', license.id)
-                } else if (hwid && license.hwid && license.hwid !== hwid) {
-                    // HWID mismatch - could be account sharing
-                    // For now, just log it but allow login
-                    console.log(`HWID mismatch for user ${authData.user.id}`)
-                }
+            // Update HWID if provided
+            if (hwid && (!license.hwid || license.hwid === hwid)) {
+                await supabase
+                    .from('licenses')
+                    .update({ hwid })
+                    .eq('id', license.id)
+            } else if (hwid && license.hwid && license.hwid !== hwid) {
+                // HWID mismatch - could be account sharing
+                return res.status(200).json({
+                    success: false,
+                    error: 'This license is already activated on another device.'
+                })
             }
 
             return res.status(200).json({
