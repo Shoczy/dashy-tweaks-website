@@ -31,6 +31,13 @@ export default function Dashboard() {
         if (tab && ['home', 'download', 'license', 'settings'].includes(tab)) {
             setActiveTab(tab as Tab)
         }
+
+        // Check if we just came back from Discord OAuth (hash contains access_token)
+        if (window.location.hash.includes('access_token')) {
+            setActiveTab('settings')
+            // Clean up the URL
+            window.history.replaceState({}, '', '/dashboard?tab=settings')
+        }
     }, [searchParams])
 
     useEffect(() => {
