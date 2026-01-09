@@ -157,37 +157,24 @@ export const getLicense = async (userId: string) => {
 }
 
 export const redeemLicense = async (key: string, userId: string) => {
-    // First check if key exists and is not redeemed
-    const { data: license, error: findError } = await supabase
-        .from('licenses')
-        .select('*')
-        .eq('key', key.toUpperCase())
-        .single()
-
-    if (findError || !license) {
-        return { error: { message: 'Invalid license key' } }
-    }
-
-    if (license.user_id) {
-        return { error: { message: 'License already redeemed' } }
-    }
-
-    if (!license.is_active) {
-        return { error: { message: 'License has been revoked' } }
-    }
-
-    // Redeem it
-    const { error } = await supabase
-        .from('licenses')
-        .update({
-            user_id: userId,
-            redeemed_at: new Date().toISOString()
+    try {
+        // Use API route with service key to bypass RLS
+        const response = await fetch('/api/license?action=redeem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: key.trim(), user_id: userId })
         })
-        .eq('key', key.toUpperCase())
 
-    if (error) {
-        return { error: { message: 'Failed to redeem license' } }
+        const result = await response.json()
+        console.log('Redeem result:', result)
+
+        if (!result.success) {
+            return { error: { message: result.error || 'Failed to redeem license' } }
+        }
+
+        return { data: result.license, error: null }
+    } catch (e: any) {
+        console.error('Redeem error:', e)
+        return { error: { message: e.message || 'Network error' } }
     }
-
-    return { data: license, error: null }
 }
