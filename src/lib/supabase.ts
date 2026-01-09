@@ -62,11 +62,29 @@ export const unlinkDiscordAccount = async () => {
 }
 
 export const updateProfileDiscord = async (userId: string, discordData: { discord_id: string | null, discord_username: string | null, discord_avatar: string | null }) => {
-    const { error } = await supabase
+    // Make sure we have a valid session
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+        console.error('No session for profile update')
+        return { error: { message: 'Not authenticated' } }
+    }
+
+    const { data, error } = await supabase
         .from('profiles')
-        .update(discordData)
+        .update({
+            ...discordData,
+            updated_at: new Date().toISOString()
+        })
         .eq('id', userId)
-    return { error }
+        .select()
+
+    if (error) {
+        console.error('Profile update error:', error)
+    } else {
+        console.log('Profile updated:', data)
+    }
+
+    return { data, error }
 }
 
 export const signInWithGoogle = async () => {

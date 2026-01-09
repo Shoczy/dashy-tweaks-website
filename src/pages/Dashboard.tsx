@@ -27,16 +27,29 @@ export default function Dashboard() {
     const [updatingProfile, setUpdatingProfile] = useState(false)
     const [agreedToTerms, setAgreedToTerms] = useState(false)
 
+    // Initialize tab from URL or localStorage
     useEffect(() => {
         const tab = searchParams.get('tab')
+        const savedTab = localStorage.getItem('dashboard-tab')
         if (tab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms'].includes(tab)) {
             setActiveTab(tab as Tab)
+            localStorage.setItem('dashboard-tab', tab)
+        } else if (savedTab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms'].includes(savedTab)) {
+            setActiveTab(savedTab as Tab)
         }
         if (window.location.hash.includes('access_token')) {
             setActiveTab('settings')
+            localStorage.setItem('dashboard-tab', 'settings')
             window.history.replaceState({}, '', '/dashboard?tab=settings')
         }
     }, [searchParams])
+
+    // Save tab to localStorage when it changes
+    const handleTabChange = (tab: Tab) => {
+        setActiveTab(tab)
+        localStorage.setItem('dashboard-tab', tab)
+        window.history.replaceState({}, '', `/dashboard?tab=${tab}`)
+    }
 
     useEffect(() => {
         const syncDiscordData = async () => {
@@ -139,14 +152,14 @@ export default function Dashboard() {
                 </div>
                 <nav className="flex-1 px-4 space-y-1">
                     {menuItems.map(item => (
-                        <button key={item.id} onClick={() => setActiveTab(item.id as Tab)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-emerald-500/15 text-emerald-400' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
+                        <button key={item.id} onClick={() => handleTabChange(item.id as Tab)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-emerald-500/15 text-emerald-400' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={item.icon} /></svg>
                             {item.label}
                         </button>
                     ))}
                     <div className="pt-4 pb-2 px-3"><span className="text-[10px] font-medium text-neutral-600 uppercase tracking-wider">Support</span></div>
                     {supportItems.map(item => (
-                        <button key={item.id} onClick={() => setActiveTab(item.id as Tab)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-emerald-500/15 text-emerald-400' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
+                        <button key={item.id} onClick={() => handleTabChange(item.id as Tab)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-emerald-500/15 text-emerald-400' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={item.icon} /></svg>
                             {item.label}
                         </button>
@@ -175,11 +188,11 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <div className="grid grid-cols-3 gap-4 mb-8">
-                            <button onClick={() => setActiveTab('download')} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
+                            <button onClick={() => handleTabChange('download')} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
                                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4"><svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div>
                                 <h3 className="font-semibold text-white mb-1">Download App</h3><p className="text-sm text-neutral-500">Get Dashy Tweaks</p>
                             </button>
-                            <button onClick={() => setActiveTab('license')} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
+                            <button onClick={() => handleTabChange('license')} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
                                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4"><svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg></div>
                                 <h3 className="font-semibold text-white mb-1">Redeem Key</h3><p className="text-sm text-neutral-500">Activate Premium</p>
                             </button>
@@ -223,7 +236,7 @@ export default function Dashboard() {
                             <label className="flex items-center gap-3 mt-6 cursor-pointer">
                                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${agreedToTerms ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>{agreedToTerms && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}</div>
                                 <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="hidden" />
-                                <span className="text-sm text-neutral-400">I agree to the <button onClick={() => setActiveTab('terms')} className="text-emerald-400 hover:underline">Terms of Service</button></span>
+                                <span className="text-sm text-neutral-400">I agree to the <button onClick={() => handleTabChange('terms')} className="text-emerald-400 hover:underline">Terms of Service</button></span>
                             </label>
                             <button onClick={handleRedeem} disabled={redeeming || !licenseKey.trim() || !agreedToTerms} className="w-full mt-6 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-white/5 disabled:text-neutral-600 rounded-xl font-semibold text-white shadow-lg shadow-emerald-500/30 disabled:shadow-none transition-all">{redeeming ? 'Redeeming...' : 'Redeem Key'}</button>
                             {redeemError && <p className="mt-4 text-sm text-red-400 text-center">{redeemError}</p>}
