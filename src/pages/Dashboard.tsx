@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { signOut, redeemLicense, linkDiscordAccount, unlinkDiscordAccount, updateProfileDiscord, supabase } from '../lib/supabase'
 
 const DISCORD = 'https://discord.gg/cXxFzBuG'
-type Tab = 'home' | 'download' | 'license' | 'settings' | 'status' | 'faq' | 'terms'
+type Tab = 'home' | 'download' | 'license' | 'settings' | 'status' | 'faq' | 'terms' | 'changelog'
 
 const DiscordIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
     <svg className={className} viewBox="0 0 127.14 96.36" fill="currentColor">
@@ -33,10 +33,10 @@ export default function Dashboard() {
     useEffect(() => {
         const tab = searchParams.get('tab')
         const savedTab = localStorage.getItem('dashboard-tab')
-        if (tab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms'].includes(tab)) {
+        if (tab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms', 'changelog'].includes(tab)) {
             setActiveTab(tab as Tab)
             localStorage.setItem('dashboard-tab', tab)
-        } else if (savedTab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms'].includes(savedTab)) {
+        } else if (savedTab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms', 'changelog'].includes(savedTab)) {
             setActiveTab(savedTab as Tab)
         }
         if (window.location.hash.includes('access_token')) {
@@ -176,6 +176,7 @@ export default function Dashboard() {
         { id: 'license', icon: 'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z', label: 'Redeem Key' },
     ]
     const supportItems = [
+        { id: 'changelog', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', label: 'Changelog' },
         { id: 'faq', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', label: 'FAQs' },
         { id: 'status', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: 'System Status' },
         { id: 'terms', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', label: 'Terms of Service' },
@@ -325,6 +326,65 @@ export default function Dashboard() {
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center"><svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                                 <div><p className="font-medium text-white">All Systems Operational</p><p className="text-sm text-neutral-400">Last updated: {new Date().toLocaleString('de-DE')}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Changelog Tab */}
+                {activeTab === 'changelog' && (
+                    <div className="p-8 max-w-3xl mx-auto">
+                        <div className="mb-8">
+                            <h1 className="text-2xl font-bold text-white mb-2">Changelog</h1>
+                            <p className="text-neutral-500">Stay up to date with the latest updates</p>
+                        </div>
+                        <div className="space-y-6">
+                            {/* v1.2.0 */}
+                            <div className="relative pl-8 pb-6 border-l-2 border-emerald-500/30">
+                                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
+                                <div className="flex items-center gap-3 mb-3">
+                                    <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded">v1.2.0</span>
+                                    <span className="text-sm text-neutral-500">10. Januar 2026</span>
+                                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-medium rounded">LATEST</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Discord Giveaway System mit Live Entry-Counter</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">User Blacklist System für Admins</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Neuer Payment Flow mit automatischer License Delivery</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Ticket System zeigt jetzt Claim Button für Staff</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">License Info zeigt wer den Key redeemed hat</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">FIXED</span><span className="text-sm text-neutral-300">Doppelter Ping in Ticket Channels behoben</span></div>
+                                </div>
+                            </div>
+
+                            {/* v1.1.0 */}
+                            <div className="relative pl-8 pb-6 border-l-2 border-white/10">
+                                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-white/20 ring-4 ring-white/5" />
+                                <div className="flex items-center gap-3 mb-3">
+                                    <span className="px-2 py-1 bg-white/10 text-white text-xs font-bold rounded">v1.1.0</span>
+                                    <span className="text-sm text-neutral-500">8. Januar 2026</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Discord Bot mit Components v2 Design</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Ticket System für Käufe und Support</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">HWID Reset Request System</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Dashboard Redesign mit neuer Sidebar</span></div>
+                                </div>
+                            </div>
+
+                            {/* v1.0.0 */}
+                            <div className="relative pl-8 pb-6 border-l-2 border-white/10">
+                                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-white/20 ring-4 ring-white/5" />
+                                <div className="flex items-center gap-3 mb-3">
+                                    <span className="px-2 py-1 bg-white/10 text-white text-xs font-bold rounded">v1.0.0</span>
+                                    <span className="text-sm text-neutral-500">1. Januar 2026</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Initial Release von Dashy Tweaks</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">270+ Windows Optimierungs-Tweaks</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">FPS Booster, Input Delay Optimizer, Network Optimizer</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">License System mit Discord Integration</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
