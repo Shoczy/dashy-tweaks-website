@@ -106,12 +106,19 @@ export const getSession = async () => {
 }
 
 export const getProfile = async (userId: string) => {
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-    return { data, error }
+    try {
+        console.log('getProfile called for:', userId)
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single()
+        console.log('getProfile result:', data, error)
+        return { data, error }
+    } catch (e) {
+        console.error('getProfile exception:', e)
+        return { data: null, error: e }
+    }
 }
 
 export const getLicense = async (userId: string) => {
