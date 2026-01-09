@@ -26,9 +26,6 @@ export default function Layout() {
 
                         <div className="hidden md:flex items-center gap-1">
                             <NavLink to="/" active={location.pathname === '/'}>Home</NavLink>
-                            <NavLink to="/download" active={location.pathname === '/download'}>Download</NavLink>
-                            <NavLink to="/pricing" active={location.pathname === '/pricing'}>Pricing</NavLink>
-                            <NavLink to="/how-to-use" active={location.pathname === '/how-to-use'}>Docs</NavLink>
                             <a href={DISCORD} target="_blank" className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition">
                                 Discord
                             </a>
@@ -76,9 +73,6 @@ export default function Layout() {
                 {menuOpen && (
                     <div className="md:hidden glass-card mx-6 mt-2 rounded-2xl p-4 animate-fadeIn">
                         <Link to="/" className="block py-3 text-neutral-400 hover:text-white" onClick={() => setMenuOpen(false)}>Home</Link>
-                        <Link to="/download" className="block py-3 text-neutral-400 hover:text-white" onClick={() => setMenuOpen(false)}>Download</Link>
-                        <Link to="/pricing" className="block py-3 text-neutral-400 hover:text-white" onClick={() => setMenuOpen(false)}>Pricing</Link>
-                        <Link to="/how-to-use" className="block py-3 text-neutral-400 hover:text-white" onClick={() => setMenuOpen(false)}>Docs</Link>
                         <a href={DISCORD} className="block py-3 text-neutral-400 hover:text-white">Discord</a>
                         {user ? (
                             <Link to="/dashboard" className="block py-3 text-neutral-400 hover:text-white" onClick={() => setMenuOpen(false)}>Dashboard</Link>

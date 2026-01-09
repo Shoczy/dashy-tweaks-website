@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { signOut, redeemLicense } from '../lib/supabase'
 
-type Tab = 'home' | 'license' | 'discord' | 'settings'
+type Tab = 'home' | 'download' | 'pricing' | 'license' | 'discord' | 'settings'
 
 export default function Dashboard() {
     const { user, profile, license, loading, isPremium, refreshData } = useAuth()
@@ -54,6 +54,8 @@ export default function Dashboard() {
 
     const menuItems = [
         { id: 'home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', label: 'Dashboard' },
+        { id: 'download', icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', label: 'Download' },
+        { id: 'pricing', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Pricing' },
         { id: 'license', icon: 'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z', label: 'License' },
         { id: 'discord', icon: 'M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84', label: 'Discord' },
         { id: 'settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', label: 'Settings' },
@@ -215,6 +217,112 @@ export default function Dashboard() {
                                     </div>
                                     <p className="text-sm text-emerald-400">Open Settings →</p>
                                 </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Download Tab */}
+                    {activeTab === 'download' && (
+                        <div className="space-y-6">
+                            <div>
+                                <h1 className="text-2xl font-bold">Download</h1>
+                                <p className="text-neutral-500">Get the Dashy Tweaks application</p>
+                            </div>
+
+                            <div className="glass-card rounded-2xl p-8 border border-emerald-500/20">
+                                <div className="flex items-center gap-6 mb-6">
+                                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold">Dashy Tweaks</h2>
+                                        <p className="text-neutral-500">Version 1.0.0 • Windows 10/11</p>
+                                    </div>
+                                </div>
+                                <a
+                                    href="https://github.com/Shoczy/dashy-tweaks/releases/latest"
+                                    target="_blank"
+                                    className="inline-flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-400 rounded-xl font-medium transition"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Download for Windows
+                                </a>
+                            </div>
+
+                            <div className="glass-card rounded-2xl p-6">
+                                <h3 className="font-semibold mb-4">System Requirements</h3>
+                                <ul className="space-y-2 text-sm text-neutral-400">
+                                    <li className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Windows 10 or Windows 11
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Administrator privileges required
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        ~50MB disk space
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Pricing Tab */}
+                    {activeTab === 'pricing' && (
+                        <div className="space-y-6">
+                            <div>
+                                <h1 className="text-2xl font-bold">Pricing</h1>
+                                <p className="text-neutral-500">Upgrade to Premium for full access</p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="glass-card rounded-2xl p-6">
+                                    <h3 className="text-lg font-semibold mb-2">Free</h3>
+                                    <p className="text-3xl font-bold mb-4">€0</p>
+                                    <ul className="space-y-2 text-sm text-neutral-400 mb-6">
+                                        <li>✓ 50+ Basic Tweaks</li>
+                                        <li>✓ FPS Optimization</li>
+                                        <li>✓ Memory Cleanup</li>
+                                        <li>✓ Community Support</li>
+                                    </ul>
+                                    <button disabled className="w-full py-3 bg-white/5 rounded-xl text-neutral-500">
+                                        Current Plan
+                                    </button>
+                                </div>
+
+                                <div className="glass-card rounded-2xl p-6 border border-emerald-500/30 bg-emerald-500/5">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-lg font-semibold">Premium</h3>
+                                        <span className="px-2 py-1 bg-emerald-500 rounded-full text-xs font-medium">Popular</span>
+                                    </div>
+                                    <p className="text-3xl font-bold mb-4">€15 <span className="text-sm text-neutral-500 font-normal">lifetime</span></p>
+                                    <ul className="space-y-2 text-sm mb-6">
+                                        <li className="text-emerald-400">✓ 270+ Premium Tweaks</li>
+                                        <li className="text-emerald-400">✓ Advanced GPU Tweaks</li>
+                                        <li className="text-emerald-400">✓ Security Optimizations</li>
+                                        <li className="text-emerald-400">✓ Priority Support</li>
+                                        <li className="text-emerald-400">✓ All Future Updates</li>
+                                    </ul>
+                                    <a
+                                        href="https://discord.gg/cXxFzBuG"
+                                        target="_blank"
+                                        className="block w-full py-3 bg-emerald-500 hover:bg-emerald-400 rounded-xl font-medium text-center transition"
+                                    >
+                                        Get Premium on Discord
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     )}
