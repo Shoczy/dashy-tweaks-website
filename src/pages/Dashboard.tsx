@@ -215,7 +215,7 @@ export default function Dashboard() {
                 <div className="p-4 border-t border-white/5">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                         {discordLinked?.avatar ? <img src={discordLinked.avatar} className="w-10 h-10 rounded-full ring-2 ring-emerald-500/30" alt="" /> : <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-sm font-bold text-emerald-400">{profile?.username?.[0]?.toUpperCase() || user?.user_metadata?.username?.[0]?.toUpperCase() || 'U'}</div>}
-                        <div className="flex-1 min-w-0"><p className="font-medium text-sm text-white truncate">{profile?.username || user?.user_metadata?.username || 'User'}</p><p className={`text-xs ${isPremium ? 'text-emerald-400' : 'text-neutral-500'}`}>{isPremium ? '⭐ Premium' : 'No Plan'}</p></div>
+                        <div className="flex-1 min-w-0"><p className="font-medium text-sm text-white truncate">{profile?.username || user?.user_metadata?.username || 'User'}</p><p className={`text-xs ${isPremium ? 'text-emerald-400' : 'text-neutral-500'}`}>{isPremium ? (license?.expires_at ? `${Math.max(0, Math.ceil((new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left` : 'Lifetime') : 'No Plan'}</p></div>
                         <button onClick={handleLogout} className="p-2 text-neutral-500 hover:text-red-400 rounded-lg transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
                     </div>
                 </div>
@@ -229,7 +229,7 @@ export default function Dashboard() {
                         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-transparent border border-emerald-500/20 p-8 mb-8">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl" />
                             <div className="relative">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400 mb-4"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />{isPremium ? 'Premium Active' : 'No Plan'}</div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400 mb-4"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />{isPremium ? (license?.expires_at ? `${Math.max(0, Math.ceil((new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left` : 'Lifetime') : 'No Plan'}</div>
                                 <h1 className="text-3xl font-bold text-white mb-2">Welcome back, <span className="text-emerald-400">{profile?.username || user?.user_metadata?.username || 'User'}</span></h1>
                                 <p className="text-neutral-400">Manage your account and optimize your gaming experience.</p>
                             </div>
