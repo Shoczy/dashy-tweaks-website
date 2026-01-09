@@ -25,8 +25,16 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
+    try {
+        const { error } = await supabase.auth.signOut()
+        if (error) console.error('Sign out error:', error)
+        // Clear local storage
+        localStorage.removeItem('dashboard-tab')
+        return { error }
+    } catch (e: any) {
+        console.error('Sign out exception:', e)
+        return { error: { message: e.message } }
+    }
 }
 
 export const signInWithDiscord = async () => {
@@ -50,15 +58,21 @@ export const linkDiscordAccount = async () => {
 }
 
 export const unlinkDiscordAccount = async () => {
-    // Get current user identities
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: { message: 'Not logged in' } }
+    try {
+        // Get current user identities
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return { error: { message: 'Not logged in' } }
 
-    const discordIdentity = user.identities?.find(i => i.provider === 'discord')
-    if (!discordIdentity) return { error: { message: 'Discord not linked' } }
+        const discordIdentity = user.identities?.find(i => i.provider === 'discord')
+        if (!discordIdentity) return { error: { message: 'Discord not linked' } }
 
-    const { error } = await supabase.auth.unlinkIdentity(discordIdentity)
-    return { error }
+        const { error } = await supabase.auth.unlinkIdentity(discordIdentity)
+        if (error) console.error('Unlink error:', error)
+        return { error }
+    } catch (e: any) {
+        console.error('Unlink exception:', e)
+        return { error: { message: e.message } }
+    }
 }
 
 export const updateProfileDiscord = async (userId: string, discordData: { discord_id: string | null, discord_username: string | null, discord_avatar: string | null }) => {

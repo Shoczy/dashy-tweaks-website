@@ -105,11 +105,19 @@ export default function Dashboard() {
 
     useEffect(() => { if (!loading && !user) navigate('/') }, [user, loading, navigate])
 
-    const handleLogout = async () => { await signOut(); navigate('/') }
+    const handleLogout = async () => {
+        console.log('Logging out...')
+        await signOut()
+        window.location.href = '/'
+    }
     const handleLinkDiscord = async () => { setLinkingDiscord(true); await linkDiscordAccount() }
     const handleUnlinkDiscord = async () => {
         setUnlinkingDiscord(true)
-        await unlinkDiscordAccount()
+        console.log('Unlinking Discord...')
+        const { error } = await unlinkDiscordAccount()
+        if (error) {
+            console.error('Unlink failed:', error)
+        }
         await updateProfileDiscord(user!.id, { discord_id: null, discord_username: null, discord_avatar: null })
         setDiscordLinked(null)
         await refreshData()
@@ -117,23 +125,34 @@ export default function Dashboard() {
     }
     const handleSyncDiscordRole = async () => {
         setSyncingRole(true)
-        // This would call your Discord bot API to sync roles
-        // For now, just refresh the data
+        console.log('Syncing Discord role...')
+        // TODO: Call Discord bot API to sync roles
+        await new Promise(r => setTimeout(r, 1000)) // Simulate API call
         await refreshData()
         setSyncingRole(false)
+        alert('Role synced! (Bot integration coming soon)')
     }
     const handleUpdateDiscordProfile = async () => {
         setUpdatingProfile(true)
+        console.log('Updating Discord profile...')
         const { data: { user: freshUser } } = await supabase.auth.getUser()
         if (freshUser) {
             const discordIdentity = freshUser.identities?.find(i => i.provider === 'discord')
             if (discordIdentity) {
                 const discordData = discordIdentity.identity_data
-                await updateProfileDiscord(user!.id, {
+                const result = await updateProfileDiscord(user!.id, {
                     discord_id: discordData?.provider_id || discordIdentity.id,
                     discord_username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
                     discord_avatar: discordData?.avatar_url || null
                 })
+                console.log('Update result:', result)
+                if (discordData) {
+                    setDiscordLinked({
+                        id: discordData.provider_id || discordIdentity.id,
+                        username: discordData.full_name || discordData.name || null,
+                        avatar: discordData.avatar_url || null
+                    })
+                }
                 await refreshData()
             }
         }
