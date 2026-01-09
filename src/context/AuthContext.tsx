@@ -99,25 +99,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         // Get initial session with timeout
         const timeout = setTimeout(() => {
+            console.log('Auth loading timeout reached')
             setLoading(false)
-        }, 3000) // Max 3 seconds loading
+        }, 5000) // Max 5 seconds loading
 
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            clearTimeout(timeout)
-            setUser(session?.user ?? null)
-            if (session?.user) {
-                loadUserData(
-                    session.user.id,
-                    session.user.email,
-                    session.user.user_metadata
-                ).finally(() => setLoading(false))
-            } else {
+        const initAuth = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession()
+                console.log('Initial session:', session?.user?.id, 'Error:', error)
+
+                clearTimeout(timeout)
+                setUser(session?.user ?? null)
+
+                if (session?.user) {
+                    await loadUserData(
+                        session.user.id,
+                        session.user.email,
+                        session.user.user_metadata
+                    )
+                }
+            } catch (e) {
+                console.error('Auth init error:', e)
+            } finally {
                 setLoading(false)
             }
-        }).catch(() => {
-            clearTimeout(timeout)
-            setLoading(false)
-        })
+        }
+
+        initAuth()
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {

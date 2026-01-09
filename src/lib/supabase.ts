@@ -108,16 +108,24 @@ export const getSession = async () => {
 export const getProfile = async (userId: string) => {
     try {
         console.log('getProfile called for:', userId)
-        const { data, error } = await supabase
+
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+        )
+
+        const fetchPromise = supabase
             .from('profiles')
             .select('*')
             .eq('id', userId)
             .single()
+
+        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any
         console.log('getProfile result:', data, error)
         return { data, error }
-    } catch (e) {
+    } catch (e: any) {
         console.error('getProfile exception:', e)
-        return { data: null, error: e }
+        return { data: null, error: { message: e.message } }
     }
 }
 
