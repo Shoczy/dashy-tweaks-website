@@ -122,8 +122,9 @@ export const getLicense = async (userId: string) => {
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
-    return { data, error }
+
+    // Return first item or null (don't use .single() as it throws on no results)
+    return { data: data?.[0] || null, error: data?.[0] ? null : error }
 }
 
 export const redeemLicense = async (key: string, userId: string) => {

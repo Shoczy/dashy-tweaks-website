@@ -27,6 +27,8 @@ export default function Dashboard() {
     const [updatingProfile, setUpdatingProfile] = useState(false)
     const [agreedToTerms, setAgreedToTerms] = useState(false)
 
+    const [discordLinked, setDiscordLinked] = useState<{ id: string, username: string | null, avatar: string | null } | null>(null)
+
     // Initialize tab from URL or localStorage
     useEffect(() => {
         const tab = searchParams.get('tab')
@@ -51,30 +53,51 @@ export default function Dashboard() {
         window.history.replaceState({}, '', `/dashboard?tab=${tab}`)
     }
 
+    // Check Discord link status from Supabase identities (this is the source of truth)
     useEffect(() => {
-        const syncDiscordData = async () => {
+        const checkDiscordStatus = async () => {
             if (!user) return
+
             const { data: { user: freshUser } } = await supabase.auth.getUser()
             if (!freshUser) return
+
             const discordIdentity = freshUser.identities?.find(i => i.provider === 'discord')
+
             if (discordIdentity) {
                 const discordData = discordIdentity.identity_data
-                const newDiscordId = discordData?.provider_id || discordIdentity.id
-                // Always sync if discord is linked but profile doesn't have the data
-                if (!profile?.discord_id || profile.discord_id !== newDiscordId) {
-                    console.log('Syncing Discord data to profile...')
-                    const { error } = await updateProfileDiscord(user.id, {
-                        discord_id: newDiscordId,
-                        discord_username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
-                        discord_avatar: discordData?.avatar_url || null
+                const discordInfo = {
+                    id: discordData?.provider_id || discordIdentity.id,
+                    username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
+                    avatar: discordData?.avatar_url || null
+                }
+                setDiscordLinked(discordInfo)
+
+                // Also sync to profile table in background
+                if (!profile?.discord_id || profile.discord_id !== discordInfo.id) {
+                    console.log('Syncing Discord to profile table...')
+                    await updateProfileDiscord(user.id, {
+                        discord_id: discordInfo.id,
+                        discord_username: discordInfo.username,
+                        discord_avatar: discordInfo.avatar
                     })
-                    if (error) console.error('Failed to sync Discord:', error)
+                    await refreshData()
+                }
+            } else {
+                setDiscordLinked(null)
+                // Clear from profile if was linked before
+                if (profile?.discord_id) {
+                    await updateProfileDiscord(user.id, {
+                        discord_id: null,
+                        discord_username: null,
+                        discord_avatar: null
+                    })
                     await refreshData()
                 }
             }
         }
-        syncDiscordData()
-    }, [user, profile?.discord_id])
+
+        checkDiscordStatus()
+    }, [user])
 
     useEffect(() => { if (!loading && !user) navigate('/') }, [user, loading, navigate])
 
@@ -84,6 +107,7 @@ export default function Dashboard() {
         setUnlinkingDiscord(true)
         await unlinkDiscordAccount()
         await updateProfileDiscord(user!.id, { discord_id: null, discord_username: null, discord_avatar: null })
+        setDiscordLinked(null)
         await refreshData()
         setUnlinkingDiscord(false)
     }
@@ -167,7 +191,7 @@ export default function Dashboard() {
                 </nav>
                 <div className="p-4 border-t border-white/5">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-                        {profile?.discord_avatar ? <img src={profile.discord_avatar} className="w-10 h-10 rounded-full ring-2 ring-emerald-500/30" alt="" /> : <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-sm font-bold text-emerald-400">{profile?.username?.[0]?.toUpperCase() || 'U'}</div>}
+                        {discordLinked?.avatar ? <img src={discordLinked.avatar} className="w-10 h-10 rounded-full ring-2 ring-emerald-500/30" alt="" /> : <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-sm font-bold text-emerald-400">{profile?.username?.[0]?.toUpperCase() || user?.user_metadata?.username?.[0]?.toUpperCase() || 'U'}</div>}
                         <div className="flex-1 min-w-0"><p className="font-medium text-sm text-white truncate">{profile?.username || user?.user_metadata?.username || 'User'}</p><p className={`text-xs ${isPremium ? 'text-emerald-400' : 'text-neutral-500'}`}>{isPremium ? '⭐ Premium' : 'No Plan'}</p></div>
                         <button onClick={handleLogout} className="p-2 text-neutral-500 hover:text-red-400 rounded-lg transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
                     </div>
@@ -368,12 +392,12 @@ export default function Dashboard() {
                                 <h3 className="font-semibold text-white">Discord Connection</h3>
                             </div>
                             <div className="p-6">
-                                {profile?.discord_id ? (
+                                {discordLinked ? (
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-4">
-                                                {profile.discord_avatar ? <img src={profile.discord_avatar} className="w-14 h-14 rounded-full ring-2 ring-[#5865F2]/30" alt="" /> : <div className="w-14 h-14 rounded-full bg-[#5865F2]/20 flex items-center justify-center"><DiscordIcon className="w-7 h-7 text-[#5865F2]" /></div>}
-                                                <div><p className="font-medium text-white">{profile.discord_username || 'Discord User'}</p><p className="text-sm text-neutral-500">Discord Connected</p></div>
+                                                {discordLinked.avatar ? <img src={discordLinked.avatar} className="w-14 h-14 rounded-full ring-2 ring-[#5865F2]/30" alt="" /> : <div className="w-14 h-14 rounded-full bg-[#5865F2]/20 flex items-center justify-center"><DiscordIcon className="w-7 h-7 text-[#5865F2]" /></div>}
+                                                <div><p className="font-medium text-white">{discordLinked.username || 'Discord User'}</p><p className="text-sm text-neutral-500">Discord Connected</p></div>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">Connected</span>
