@@ -16,7 +16,7 @@ export default function Dashboard() {
     const [redeemSuccess, setRedeemSuccess] = useState('')
 
     useEffect(() => {
-        if (!loading && !user) navigate('/login')
+        if (!loading && !user) navigate('/')
     }, [user, loading, navigate])
 
     const handleLogout = async () => {
