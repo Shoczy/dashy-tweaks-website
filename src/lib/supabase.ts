@@ -109,20 +109,20 @@ export const getProfile = async (userId: string) => {
     try {
         console.log('getProfile called for:', userId)
 
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
-        )
+        // Use API route with service key to bypass RLS issues
+        const response = await fetch(`/api/profile?userId=${userId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
 
-        const fetchPromise = supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
+        const result = await response.json()
+        console.log('getProfile API result:', result)
 
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any
-        console.log('getProfile result:', data, error)
-        return { data, error }
+        if (!result.success) {
+            return { data: null, error: { message: result.error } }
+        }
+
+        return { data: result.profile, error: null }
     } catch (e: any) {
         console.error('getProfile exception:', e)
         return { data: null, error: { message: e.message } }
