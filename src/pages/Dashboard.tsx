@@ -23,6 +23,8 @@ export default function Dashboard() {
     const [redeemSuccess, setRedeemSuccess] = useState('')
     const [linkingDiscord, setLinkingDiscord] = useState(false)
     const [unlinkingDiscord, setUnlinkingDiscord] = useState(false)
+    const [syncingRole, setSyncingRole] = useState(false)
+    const [updatingProfile, setUpdatingProfile] = useState(false)
     const [agreedToTerms, setAgreedToTerms] = useState(false)
 
     useEffect(() => {
@@ -42,14 +44,20 @@ export default function Dashboard() {
             const { data: { user: freshUser } } = await supabase.auth.getUser()
             if (!freshUser) return
             const discordIdentity = freshUser.identities?.find(i => i.provider === 'discord')
-            if (discordIdentity && !profile?.discord_id) {
+            if (discordIdentity) {
                 const discordData = discordIdentity.identity_data
-                await updateProfileDiscord(user.id, {
-                    discord_id: discordData?.provider_id || discordIdentity.id,
-                    discord_username: discordData?.full_name || discordData?.name || null,
-                    discord_avatar: discordData?.avatar_url || null
-                })
-                await refreshData()
+                const newDiscordId = discordData?.provider_id || discordIdentity.id
+                // Always sync if discord is linked but profile doesn't have the data
+                if (!profile?.discord_id || profile.discord_id !== newDiscordId) {
+                    console.log('Syncing Discord data to profile...')
+                    const { error } = await updateProfileDiscord(user.id, {
+                        discord_id: newDiscordId,
+                        discord_username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
+                        discord_avatar: discordData?.avatar_url || null
+                    })
+                    if (error) console.error('Failed to sync Discord:', error)
+                    await refreshData()
+                }
             }
         }
         syncDiscordData()
@@ -65,6 +73,30 @@ export default function Dashboard() {
         await updateProfileDiscord(user!.id, { discord_id: null, discord_username: null, discord_avatar: null })
         await refreshData()
         setUnlinkingDiscord(false)
+    }
+    const handleSyncDiscordRole = async () => {
+        setSyncingRole(true)
+        // This would call your Discord bot API to sync roles
+        // For now, just refresh the data
+        await refreshData()
+        setSyncingRole(false)
+    }
+    const handleUpdateDiscordProfile = async () => {
+        setUpdatingProfile(true)
+        const { data: { user: freshUser } } = await supabase.auth.getUser()
+        if (freshUser) {
+            const discordIdentity = freshUser.identities?.find(i => i.provider === 'discord')
+            if (discordIdentity) {
+                const discordData = discordIdentity.identity_data
+                await updateProfileDiscord(user!.id, {
+                    discord_id: discordData?.provider_id || discordIdentity.id,
+                    discord_username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
+                    discord_avatar: discordData?.avatar_url || null
+                })
+                await refreshData()
+            }
+        }
+        setUpdatingProfile(false)
     }
     const handleRedeem = async () => {
         if (!licenseKey.trim() || !user || !agreedToTerms) return
@@ -324,14 +356,26 @@ export default function Dashboard() {
                             </div>
                             <div className="p-6">
                                 {profile?.discord_id ? (
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            {profile.discord_avatar ? <img src={profile.discord_avatar} className="w-14 h-14 rounded-full ring-2 ring-[#5865F2]/30" alt="" /> : <div className="w-14 h-14 rounded-full bg-[#5865F2]/20 flex items-center justify-center"><DiscordIcon className="w-7 h-7 text-[#5865F2]" /></div>}
-                                            <div><p className="font-medium text-white">{profile.discord_username || 'Discord User'}</p><p className="text-sm text-neutral-500">Discord Connected</p></div>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                {profile.discord_avatar ? <img src={profile.discord_avatar} className="w-14 h-14 rounded-full ring-2 ring-[#5865F2]/30" alt="" /> : <div className="w-14 h-14 rounded-full bg-[#5865F2]/20 flex items-center justify-center"><DiscordIcon className="w-7 h-7 text-[#5865F2]" /></div>}
+                                                <div><p className="font-medium text-white">{profile.discord_username || 'Discord User'}</p><p className="text-sm text-neutral-500">Discord Connected</p></div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">Connected</span>
+                                                <button onClick={handleUnlinkDiscord} disabled={unlinkingDiscord} className="px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition">{unlinkingDiscord ? '...' : 'Disconnect'}</button>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">Connected</span>
-                                            <button onClick={handleUnlinkDiscord} disabled={unlinkingDiscord} className="px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition">{unlinkingDiscord ? '...' : 'Disconnect'}</button>
+                                        <div className="flex gap-3 pt-2 border-t border-white/5">
+                                            <button onClick={handleSyncDiscordRole} disabled={syncingRole} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#5865F2]/10 hover:bg-[#5865F2]/20 text-[#5865F2] rounded-xl text-sm font-medium transition">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                {syncingRole ? 'Syncing...' : 'Sync Role'}
+                                            </button>
+                                            <button onClick={handleUpdateDiscordProfile} disabled={updatingProfile} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                {updatingProfile ? 'Updating...' : 'Update Profile'}
+                                            </button>
                                         </div>
                                     </div>
                                 ) : (
