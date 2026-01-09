@@ -29,9 +29,17 @@ export default async function handler(req: any, res: any) {
                 password
             })
 
-            if (authError || !authData.user) {
-                return res.status(200).json({ success: false, error: 'Invalid email or password' })
+            if (authError) {
+                console.error('Auth error:', authError.message)
+                // Only show "Invalid credentials" for actual auth failures
+                return res.status(200).json({ success: false, error: 'Invalid credentials' })
             }
+
+            if (!authData.user) {
+                return res.status(200).json({ success: false, error: 'Invalid credentials' })
+            }
+
+            console.log('User authenticated:', authData.user.id)
 
             // Get profile
             const { data: profile } = await supabase
