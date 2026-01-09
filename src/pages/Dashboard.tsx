@@ -189,7 +189,7 @@ export default function Dashboard() {
             <div className="fixed bottom-0 right-1/4 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Sidebar */}
-            <div className="w-72 bg-black/40 backdrop-blur-xl border-r border-white/5 flex flex-col relative z-10">
+            <div className="w-72 h-screen bg-black/40 backdrop-blur-xl border-r border-white/5 flex flex-col relative z-10 sticky top-0">
                 <div className="p-6">
                     <Link to="/" className="flex items-center gap-3 group">
                         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
@@ -198,7 +198,7 @@ export default function Dashboard() {
                         <div><span className="font-bold text-lg text-white">DASHY</span><p className="text-[11px] text-emerald-400/80">Dashboard</p></div>
                     </Link>
                 </div>
-                <nav className="flex-1 px-4 space-y-1">
+                <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
                     {menuItems.map(item => (
                         <button key={item.id} onClick={() => handleTabChange(item.id as Tab)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-emerald-500/15 text-emerald-400' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={item.icon} /></svg>
@@ -213,7 +213,7 @@ export default function Dashboard() {
                         </button>
                     ))}
                 </nav>
-                <div className="p-4 border-t border-white/5">
+                <div className="p-4 border-t border-white/5 bg-black/40 backdrop-blur-xl">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                         {discordLinked?.avatar ? <img src={discordLinked.avatar} className="w-10 h-10 rounded-full ring-2 ring-emerald-500/30" alt="" /> : <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-sm font-bold text-emerald-400">{profile?.username?.[0]?.toUpperCase() || user?.user_metadata?.username?.[0]?.toUpperCase() || 'U'}</div>}
                         <div className="flex-1 min-w-0"><p className="font-medium text-sm text-white truncate">{profile?.username || user?.user_metadata?.username || 'User'}</p><p className={`text-xs ${isPremium ? 'text-emerald-400' : 'text-neutral-500'}`}>{isPremium ? (license?.expires_at ? `${Math.max(0, Math.ceil((new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left` : 'Lifetime') : 'No Plan'}</p></div>
