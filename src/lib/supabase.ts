@@ -144,16 +144,25 @@ export const getProfile = async (userId: string) => {
 }
 
 export const getLicense = async (userId: string) => {
-    const { data, error } = await supabase
-        .from('licenses')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
+    try {
+        // Use API route with service key to bypass RLS
+        const response = await fetch(`/api/license?action=get&user_id=${userId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
 
-    // Return first item or null (don't use .single() as it throws on no results)
-    return { data: data?.[0] || null, error: data?.[0] ? null : error }
+        const result = await response.json()
+        console.log('getLicense result:', result)
+
+        if (!result.success) {
+            return { data: null, error: { message: result.error } }
+        }
+
+        return { data: result.license, error: null }
+    } catch (e: any) {
+        console.error('getLicense error:', e)
+        return { data: null, error: { message: e.message } }
+    }
 }
 
 export const redeemLicense = async (key: string, userId: string) => {

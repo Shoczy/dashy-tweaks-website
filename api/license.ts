@@ -18,6 +18,29 @@ export default async function handler(req: any, res: any) {
     const action = req.query.action as string
 
     try {
+        // GET /api/license?action=get&user_id=XXX - Get user's license
+        if (req.method === 'GET' && action === 'get') {
+            const user_id = req.query.user_id as string
+            if (!user_id) {
+                return res.status(400).json({ success: false, error: 'user_id required' })
+            }
+
+            const { data: license, error } = await supabase
+                .from('licenses')
+                .select('*')
+                .eq('user_id', user_id)
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
+
+            if (error || !license) {
+                return res.status(200).json({ success: true, license: null })
+            }
+
+            return res.status(200).json({ success: true, license })
+        }
+
         // POST /api/license?action=redeem - Redeem a license key
         if (req.method === 'POST' && action === 'redeem') {
             const { key, user_id } = req.body
