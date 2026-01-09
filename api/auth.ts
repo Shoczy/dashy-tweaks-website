@@ -1,10 +1,15 @@
 // Auth API - For Tauri App Login
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-    process.env.SUPABASE_URL || 'https://purbzxxjgdumubhbjahf.supabase.co',
-    process.env.SUPABASE_SERVICE_KEY || ''
-)
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://purbzxxjgdumubhbjahf.supabase.co'
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || ''
+
+// Client for auth operations (uses anon key)
+const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// Client for DB operations (uses service key to bypass RLS)
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -23,15 +28,14 @@ export default async function handler(req: any, res: any) {
                 return res.status(400).json({ success: false, error: 'Email and password required' })
             }
 
-            // Sign in with Supabase Auth
-            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            // Sign in with Supabase Auth (using anon key)
+            const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
                 email,
                 password
             })
 
             if (authError) {
                 console.error('Auth error:', authError.message)
-                // Only show "Invalid credentials" for actual auth failures
                 return res.status(200).json({ success: false, error: 'Invalid credentials' })
             }
 
@@ -41,15 +45,15 @@ export default async function handler(req: any, res: any) {
 
             console.log('User authenticated:', authData.user.id)
 
-            // Get profile
-            const { data: profile } = await supabase
+            // Get profile (using service key to bypass RLS)
+            const { data: profile } = await supabaseAdmin
                 .from('profiles')
                 .select('*')
                 .eq('id', authData.user.id)
                 .single()
 
-            // Get active license
-            const { data: license } = await supabase
+            // Get active license (using service key to bypass RLS)
+            const { data: license } = await supabaseAdmin
                 .from('licenses')
                 .select('*')
                 .eq('user_id', authData.user.id)
@@ -88,9 +92,9 @@ export default async function handler(req: any, res: any) {
                 }
             }
 
-            // Update HWID if provided
+            // Update HWID if provided (using service key)
             if (hwid && (!license.hwid || license.hwid === hwid)) {
-                await supabase
+                await supabaseAdmin
                     .from('licenses')
                     .update({ hwid })
                     .eq('id', license.id)
@@ -135,8 +139,8 @@ export default async function handler(req: any, res: any) {
                 return res.status(200).json({ success: false, error: 'Password must be at least 6 characters' })
             }
 
-            // Check if username exists
-            const { data: existingUser } = await supabase
+            // Check if username exists (using service key)
+            const { data: existingUser } = await supabaseAdmin
                 .from('profiles')
                 .select('username')
                 .eq('username', username)
@@ -146,8 +150,8 @@ export default async function handler(req: any, res: any) {
                 return res.status(200).json({ success: false, error: 'Username already taken' })
             }
 
-            // Create user
-            const { data: authData, error: authError } = await supabase.auth.signUp({
+            // Create user (using anon key for auth)
+            const { data: authData, error: authError } = await supabaseAuth.auth.signUp({
                 email,
                 password,
                 options: {
