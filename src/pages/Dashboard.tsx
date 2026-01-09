@@ -53,14 +53,27 @@ export default function Dashboard() {
         window.history.replaceState({}, '', `/dashboard?tab=${tab}`)
     }
 
-    // Check Discord link status from Supabase identities (this is the source of truth)
+    // Check Discord link status - first from profile, then from identities
     useEffect(() => {
         const checkDiscordStatus = async () => {
             if (!user) return
 
+            // First check if we have Discord data in profile (this persists)
+            if (profile?.discord_id) {
+                console.log('Discord found in profile:', profile.discord_id)
+                setDiscordLinked({
+                    id: profile.discord_id,
+                    username: profile.discord_username,
+                    avatar: profile.discord_avatar
+                })
+                return
+            }
+
+            // If not in profile, check identities (for fresh OAuth callback)
             const { data: { user: freshUser } } = await supabase.auth.getUser()
             if (!freshUser) return
 
+            console.log('Checking identities:', freshUser.identities?.map(i => i.provider))
             const discordIdentity = freshUser.identities?.find(i => i.provider === 'discord')
 
             if (discordIdentity) {
@@ -70,34 +83,25 @@ export default function Dashboard() {
                     username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
                     avatar: discordData?.avatar_url || null
                 }
+                console.log('Discord found in identities, syncing to profile:', discordInfo)
                 setDiscordLinked(discordInfo)
 
-                // Also sync to profile table in background
-                if (!profile?.discord_id || profile.discord_id !== discordInfo.id) {
-                    console.log('Syncing Discord to profile table...')
-                    await updateProfileDiscord(user.id, {
-                        discord_id: discordInfo.id,
-                        discord_username: discordInfo.username,
-                        discord_avatar: discordInfo.avatar
-                    })
-                    await refreshData()
-                }
+                // Save to profile table so it persists
+                const result = await updateProfileDiscord(user.id, {
+                    discord_id: discordInfo.id,
+                    discord_username: discordInfo.username,
+                    discord_avatar: discordInfo.avatar
+                })
+                console.log('Profile update result:', result)
+                await refreshData()
             } else {
+                console.log('No Discord identity found')
                 setDiscordLinked(null)
-                // Clear from profile if was linked before
-                if (profile?.discord_id) {
-                    await updateProfileDiscord(user.id, {
-                        discord_id: null,
-                        discord_username: null,
-                        discord_avatar: null
-                    })
-                    await refreshData()
-                }
             }
         }
 
         checkDiscordStatus()
-    }, [user])
+    }, [user, profile?.discord_id])
 
     useEffect(() => { if (!loading && !user) navigate('/') }, [user, loading, navigate])
 
