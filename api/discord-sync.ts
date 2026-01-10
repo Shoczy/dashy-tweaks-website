@@ -83,6 +83,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             // Add new role
             if (roleToAdd && license) {
+                // First check if user is in the guild
+                const memberCheck = await fetch(
+                    `https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${profile.discord_id}`,
+                    {
+                        headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+                    }
+                )
+
+                if (!memberCheck.ok) {
+                    console.error('Member not found in guild:', await memberCheck.text())
+                    return res.status(400).json({ error: 'You are not in the Discord server. Please join first: https://discord.gg/cXxFzBuG' })
+                }
+
                 const addResponse = await fetch(
                     `https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${profile.discord_id}/roles/${roleToAdd}`,
                     {
@@ -94,7 +107,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 if (!addResponse.ok) {
                     const error = await addResponse.text()
                     console.error('Discord API error:', error)
-                    return res.status(500).json({ error: 'Failed to sync role. Make sure you are in the Discord server.' })
+                    return res.status(500).json({ error: 'Failed to assign role. Bot may lack permissions.' })
                 }
 
                 return res.status(200).json({

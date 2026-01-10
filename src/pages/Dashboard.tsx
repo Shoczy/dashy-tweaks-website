@@ -584,16 +584,16 @@ export default function Dashboard() {
                                 <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
                                 <div className="flex items-center gap-3 mb-3">
                                     <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded">v1.3.0</span>
-                                    <span className="text-sm text-neutral-500">10. Januar 2026</span>
+                                    <span className="text-sm text-neutral-500">January 10, 2026</span>
                                     <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-medium rounded">LATEST</span>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">24 Game Templates mit optimierten Tweak-Presets</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Template-Filter auf allen Tweak-Seiten</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Remember Me Login mit Auto-Login</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Templates erweitert von 25 auf 140 Tweaks pro Spiel</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Website jetzt Discord-only Purchase Flow</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded">REMOVED</span><span className="text-sm text-neutral-300">Free Plan entfernt - nur noch Monthly/Lifetime</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">24 Game Templates with optimized tweak presets</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Template filter on all tweak pages</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Remember Me login with auto-login</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Templates expanded from 25 to 140 tweaks per game</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Website now uses Discord-only purchase flow</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded">REMOVED</span><span className="text-sm text-neutral-300">Free plan removed - Monthly/Lifetime only</span></div>
                                 </div>
                             </div>
 
@@ -602,14 +602,14 @@ export default function Dashboard() {
                                 <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-white/20 ring-4 ring-white/5" />
                                 <div className="flex items-center gap-3 mb-3">
                                     <span className="px-2 py-1 bg-white/10 text-white text-xs font-bold rounded">v1.2.0</span>
-                                    <span className="text-sm text-neutral-500">9. Januar 2026</span>
+                                    <span className="text-sm text-neutral-500">January 9, 2026</span>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Discord Giveaway System mit Live Entry-Counter</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">User Blacklist System für Admins</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Neuer Payment Flow mit automatischer License Delivery</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Ticket System zeigt jetzt Claim Button für Staff</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">FIXED</span><span className="text-sm text-neutral-300">Doppelter Ping in Ticket Channels behoben</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Discord Giveaway System with live entry counter</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">User Blacklist System for admins</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">New payment flow with automatic license delivery</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Ticket system now shows claim button for staff</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">FIXED</span><span className="text-sm text-neutral-300">Double ping in ticket channels fixed</span></div>
                                 </div>
                             </div>
 
@@ -618,13 +618,13 @@ export default function Dashboard() {
                                 <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-white/20 ring-4 ring-white/5" />
                                 <div className="flex items-center gap-3 mb-3">
                                     <span className="px-2 py-1 bg-white/10 text-white text-xs font-bold rounded">v1.0.0</span>
-                                    <span className="text-sm text-neutral-500">1. Januar 2026</span>
+                                    <span className="text-sm text-neutral-500">January 1, 2026</span>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Initial Release von Dashy Tweaks</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">270+ Windows Optimierungs-Tweaks</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Initial Release of Dashy Tweaks</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">270+ Windows optimization tweaks</span></div>
                                     <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">FPS Booster, Input Delay Optimizer, Network Optimizer</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">License System mit Discord Integration</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">License system with Discord integration</span></div>
                                 </div>
                             </div>
                         </div>
