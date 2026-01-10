@@ -11,7 +11,7 @@ const DiscordIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
 )
 
 export default function Settings() {
-    const { user, profile, license, loading, isPremium, refreshData } = useAuth()
+    const { user, profile, license, loading, refreshData } = useAuth()
     const navigate = useNavigate()
     const [linkingDiscord, setLinkingDiscord] = useState(false)
     const [unlinkingDiscord, setUnlinkingDiscord] = useState(false)
@@ -203,9 +203,9 @@ export default function Settings() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 rounded-xl bg-black/30">
-                            <p className="text-sm text-neutral-500 mb-1">Status</p>
-                            <p className={`font-semibold ${isPremium ? 'text-emerald-400' : 'text-neutral-400'}`}>
-                                {isPremium ? 'Premium' : 'Free'}
+                            <p className="text-sm text-neutral-500 mb-1">Plan</p>
+                            <p className={`font-semibold ${license ? 'text-emerald-400' : 'text-neutral-400'}`}>
+                                {license ? (license.plan === 'lifetime' ? 'Lifetime' : 'Monthly') : 'None'}
                             </p>
                         </div>
                         <div className="p-4 rounded-xl bg-black/30">

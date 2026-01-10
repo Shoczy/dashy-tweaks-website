@@ -27,8 +27,8 @@ export default function HowToUse() {
                                     href={`#${s.id}`}
                                     onClick={() => setActiveSection(s.id)}
                                     className={`block px-3 py-2 text-sm rounded-lg transition ${activeSection === s.id
-                                            ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500'
-                                            : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500'
+                                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
                                     {s.label}
@@ -83,10 +83,10 @@ export default function HowToUse() {
                                 </li>
                                 <li className="flex gap-3">
                                     <span className="text-emerald-400">•</span>
-                                    <span><strong>Premium Badge</strong> — Shows which tweaks require Premium</span>
+                                    <span><strong>Game Templates</strong> — Pre-configured settings for popular games</span>
                                 </li>
                             </ul>
-                            <Tip>Free users can access basic tweaks in every category. Premium unlocks advanced optimizations.</Tip>
+                            <Tip>All features are available with both Monthly and Lifetime plans.</Tip>
                         </Section>
 
                         <Section id="applying-tweaks" title="Applying Tweaks">
@@ -148,8 +148,8 @@ export default function HowToUse() {
                             <FAQ question="Do I need to restart after every tweak?">
                                 Most tweaks apply instantly. Some require a restart — you'll see a notification when needed.
                             </FAQ>
-                            <FAQ question="What's the difference between Free and Premium?">
-                                Free includes basic optimizations. Premium unlocks advanced tweaks like GPU optimization, timer resolution, and memory management.
+                            <FAQ question="What's the difference between Monthly and Lifetime?">
+                                Both plans include all 270+ tweaks and features. Monthly is €7/month, Lifetime is €30 one-time and includes all future updates forever.
                             </FAQ>
                         </Section>
                     </div>

@@ -27,12 +27,12 @@ export default function Terms() {
                     </ul>
                 </Section>
 
-                <Section title="4. Premium Subscription">
+                <Section title="4. Subscription Plans">
                     <ul>
-                        <li><strong>Monthly:</strong> €6/month, cancel anytime</li>
-                        <li><strong>Lifetime:</strong> €60 one-time payment, includes all future updates</li>
-                        <li>Payments are processed securely by Stripe</li>
-                        <li>Refunds available within 7 days if you haven't used Premium features</li>
+                        <li><strong>Monthly:</strong> €7/month, cancel anytime</li>
+                        <li><strong>Lifetime:</strong> €30 one-time payment, includes all future updates</li>
+                        <li>Payments are processed via Discord (PayPal)</li>
+                        <li>Refunds available within 7 days if you haven't used the software</li>
                     </ul>
                 </Section>
 
