@@ -17,11 +17,10 @@ export default function StatsCounter() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Get unique HWID count (real users who activated the app)
-                const { count: hwidCount } = await supabase
-                    .from('licenses')
+                // Get registered user count from profiles table
+                const { count: userCount } = await supabase
+                    .from('profiles')
                     .select('*', { count: 'exact', head: true })
-                    .not('hwid', 'is', null)
 
                 // Get download count
                 const { count: downloadCount } = await supabase
@@ -29,7 +28,7 @@ export default function StatsCounter() {
                     .select('*', { count: 'exact', head: true })
 
                 setStats({
-                    users: hwidCount || 0,
+                    users: userCount || 0,
                     downloads: downloadCount || 0,
                     tweaks: 270
                 })
