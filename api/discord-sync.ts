@@ -132,9 +132,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 )
 
                 if (!addResponse.ok) {
-                    const error = await addResponse.text()
-                    console.error('Discord API error:', error)
-                    return res.status(500).json({ error: 'Failed to assign role. Bot may lack permissions.' })
+                    const errorText = await addResponse.text()
+                    console.error('Discord API error adding role:', errorText)
+                    console.error('Role ID:', roleToAdd, 'Guild ID:', DISCORD_GUILD_ID, 'User ID:', profile.discord_id)
+
+                    // Parse Discord error for better message
+                    let errorMsg = 'Failed to assign role.'
+                    try {
+                        const errorJson = JSON.parse(errorText)
+                        if (errorJson.code === 50013) {
+                            errorMsg = 'Bot lacks permission. Make sure the bot role is ABOVE the role it tries to assign in Server Settings → Roles.'
+                        } else if (errorJson.code === 10011) {
+                            errorMsg = 'Role not found. Check DISCORD_LIFETIME_ROLE_ID and DISCORD_MONTHLY_ROLE_ID in Vercel.'
+                        } else {
+                            errorMsg = errorJson.message || errorMsg
+                        }
+                    } catch { }
+
+                    return res.status(500).json({ error: errorMsg, details: errorText })
                 }
 
                 return res.status(200).json({
