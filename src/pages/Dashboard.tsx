@@ -766,9 +766,20 @@ export default function Dashboard() {
                                 <h3 className="font-semibold text-white">Account Information</h3>
                             </div>
                             <div className="p-6 grid grid-cols-2 gap-6">
-                                <div><p className="text-sm text-neutral-500 mb-1">Member Since</p><p className="text-white font-medium">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString('de-DE') : '-'}</p></div>
+                                <div><p className="text-sm text-neutral-500 mb-1">Member Since</p><p className="text-white font-medium">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}</p></div>
                                 <div><p className="text-sm text-neutral-500 mb-1">Subscription</p><p className={`font-medium ${isPremium ? 'text-emerald-400' : 'text-neutral-400'}`}>{isPremium ? (license?.expires_at ? `${Math.max(0, Math.ceil((new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left` : 'Lifetime') : 'No Plan'}</p></div>
-                                {license && (<><div><p className="text-sm text-neutral-500 mb-1">License Type</p><p className="text-white font-medium">{license.plan === 'lifetime' ? 'Lifetime' : 'Subscription'}</p></div><div><p className="text-sm text-neutral-500 mb-1">Expires</p><p className="text-white font-medium">{license.expires_at ? new Date(license.expires_at).toLocaleDateString('de-DE') : 'Never'}</p></div></>)}
+                                {license && (<><div><p className="text-sm text-neutral-500 mb-1">License Type</p><p className="text-white font-medium">{license.plan === 'lifetime' ? 'Lifetime' : 'Monthly'}</p></div><div><p className="text-sm text-neutral-500 mb-1">Expires</p><p className="text-white font-medium">{license.expires_at ? new Date(license.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}</p></div></>)}
+                                {discordLinked && license && (
+                                    <div className="col-span-2 pt-4 border-t border-white/5">
+                                        <p className="text-sm text-neutral-500 mb-2">Discord Role</p>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${license.plan === 'lifetime' ? 'bg-amber-500/20 text-amber-400' : 'bg-[#5865F2]/20 text-[#5865F2]'}`}>
+                                                {license.plan === 'lifetime' ? '👑 Lifetime' : '⭐ Monthly'}
+                                            </span>
+                                            <span className="text-xs text-neutral-500">Synced with Discord</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
