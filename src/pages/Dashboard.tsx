@@ -239,6 +239,7 @@ export default function Dashboard() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const [activeTab, setActiveTab] = useState<Tab>('home')
+    const [sidebarOpen, setSidebarOpen] = useState(false)
     const [licenseKey, setLicenseKey] = useState('')
     const [redeeming, setRedeeming] = useState(false)
     const [redeemError, setRedeemError] = useState('')
@@ -271,6 +272,7 @@ export default function Dashboard() {
     // Save tab to localStorage when it changes
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab)
+        setSidebarOpen(false) // Close sidebar on mobile when tab changes
         localStorage.setItem('dashboard-tab', tab)
         window.history.replaceState({}, '', `/dashboard?tab=${tab}`)
     }
@@ -433,9 +435,27 @@ export default function Dashboard() {
             <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
             <div className="fixed bottom-0 right-1/4 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
+            {/* Mobile Header */}
+            <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
+                <Link to="/" className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <span className="font-bold text-white">DASHY</span>
+                </Link>
+                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-neutral-400 hover:text-white">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        {sidebarOpen ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
+                    </svg>
+                </button>
+            </div>
+
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && <div className="lg:hidden fixed inset-0 bg-black/60 z-40" onClick={() => setSidebarOpen(false)} />}
+
             {/* Sidebar */}
-            <div className="w-72 h-screen bg-black/40 backdrop-blur-xl border-r border-white/5 flex flex-col relative z-10 sticky top-0">
-                <div className="p-6">
+            <div className={`fixed lg:sticky top-0 left-0 h-screen w-72 bg-black/95 lg:bg-black/40 backdrop-blur-xl border-r border-white/5 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+                <div className="p-6 hidden lg:block">
                     <Link to="/" className="flex items-center gap-3 group">
                         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -443,7 +463,13 @@ export default function Dashboard() {
                         <div><span className="font-bold text-lg text-white">DASHY</span><p className="text-[11px] text-emerald-400/80">Dashboard</p></div>
                     </Link>
                 </div>
-                <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+                <div className="p-6 lg:hidden flex items-center justify-between border-b border-white/5">
+                    <span className="font-bold text-white">Menu</span>
+                    <button onClick={() => setSidebarOpen(false)} className="p-1 text-neutral-400 hover:text-white">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <nav className="flex-1 px-4 space-y-1 overflow-y-auto pt-2 lg:pt-0">
                     {menuItems.map(item => (
                         <button key={item.id} onClick={() => handleTabChange(item.id as Tab)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-emerald-500/15 text-emerald-400' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={item.icon} /></svg>
@@ -468,11 +494,11 @@ export default function Dashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-auto relative z-10">
+            <div className="flex-1 overflow-auto relative z-10 pt-16 lg:pt-0">
                 {/* Home Tab */}
                 {activeTab === 'home' && (
-                    <div className="p-8 max-w-5xl mx-auto">
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-transparent border border-emerald-500/20 p-8 mb-8">
+                    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-transparent border border-emerald-500/20 p-6 md:p-8 mb-6 md:mb-8">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl" />
                             <div className="relative">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400 mb-4"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />{isPremium ? (license?.expires_at ? `${Math.max(0, Math.ceil((new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left` : 'Lifetime') : 'No Plan'}</div>
@@ -480,51 +506,51 @@ export default function Dashboard() {
                                 <p className="text-neutral-400">Manage your account and optimize your gaming experience.</p>
                             </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 mb-8">
-                            <button onClick={() => handleTabChange('download')} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4"><svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 md:mb-8">
+                            <button onClick={() => handleTabChange('download')} className="group p-4 md:p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
+                                <div className="w-10 md:w-12 h-10 md:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-3 md:mb-4"><svg className="w-5 md:w-6 h-5 md:h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div>
                                 <h3 className="font-semibold text-white mb-1">Download App</h3><p className="text-sm text-neutral-500">Get Dashy Tweaks</p>
                             </button>
-                            <button onClick={() => handleTabChange('license')} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4"><svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg></div>
+                            <button onClick={() => handleTabChange('license')} className="group p-4 md:p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 transition-all text-left">
+                                <div className="w-10 md:w-12 h-10 md:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-3 md:mb-4"><svg className="w-5 md:w-6 h-5 md:h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg></div>
                                 <h3 className="font-semibold text-white mb-1">Redeem Key</h3><p className="text-sm text-neutral-500">Activate Premium</p>
                             </button>
-                            <a href={DISCORD} target="_blank" className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#5865F2]/30 transition-all text-left">
-                                <div className="w-12 h-12 rounded-xl bg-[#5865F2]/10 flex items-center justify-center mb-4"><DiscordIcon className="w-6 h-6 text-[#5865F2]" /></div>
+                            <a href={DISCORD} target="_blank" className="group p-4 md:p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#5865F2]/30 transition-all text-left">
+                                <div className="w-10 md:w-12 h-10 md:h-12 rounded-xl bg-[#5865F2]/10 flex items-center justify-center mb-3 md:mb-4"><DiscordIcon className="w-5 md:w-6 h-5 md:h-6 text-[#5865F2]" /></div>
                                 <h3 className="font-semibold text-white mb-1">Join Discord</h3><p className="text-sm text-neutral-500">Get Support</p>
                             </a>
                         </div>
-                        <div className="grid grid-cols-4 gap-4">
-                            <div className="p-5 rounded-xl bg-white/5 border border-white/5"><p className="text-2xl font-bold text-emerald-400">270+</p><p className="text-sm text-neutral-500">Total Tweaks</p></div>
-                            <div className="p-5 rounded-xl bg-white/5 border border-white/5"><p className="text-2xl font-bold text-white">{isPremium ? '270+' : '50+'}</p><p className="text-sm text-neutral-500">Available</p></div>
-                            <div className="p-5 rounded-xl bg-white/5 border border-white/5"><p className="text-2xl font-bold text-white">+30%</p><p className="text-sm text-neutral-500">FPS Boost</p></div>
-                            <div className="p-5 rounded-xl bg-white/5 border border-white/5"><p className={`text-2xl font-bold ${isPremium ? 'text-emerald-400' : 'text-neutral-400'}`}>{isPremium ? 'Active' : 'Free'}</p><p className="text-sm text-neutral-500">Status</p></div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                            <div className="p-4 md:p-5 rounded-xl bg-white/5 border border-white/5"><p className="text-xl md:text-2xl font-bold text-emerald-400">270+</p><p className="text-xs md:text-sm text-neutral-500">Total Tweaks</p></div>
+                            <div className="p-4 md:p-5 rounded-xl bg-white/5 border border-white/5"><p className="text-xl md:text-2xl font-bold text-white">{isPremium ? '270+' : '50+'}</p><p className="text-xs md:text-sm text-neutral-500">Available</p></div>
+                            <div className="p-4 md:p-5 rounded-xl bg-white/5 border border-white/5"><p className="text-xl md:text-2xl font-bold text-white">+30%</p><p className="text-xs md:text-sm text-neutral-500">FPS Boost</p></div>
+                            <div className="p-4 md:p-5 rounded-xl bg-white/5 border border-white/5"><p className={`text-xl md:text-2xl font-bold ${isPremium ? 'text-emerald-400' : 'text-neutral-400'}`}>{isPremium ? 'Active' : 'Free'}</p><p className="text-xs md:text-sm text-neutral-500">Status</p></div>
                         </div>
                     </div>
                 )}
 
                 {/* Download Tab */}
                 {activeTab === 'download' && (
-                    <div className="p-8 max-w-5xl mx-auto">
+                    <div className="p-4 md:p-8 max-w-5xl mx-auto">
                         <div className="mb-6"><h1 className="text-2xl font-bold text-white mb-2">Download</h1><p className="text-neutral-500">Get the Dashy Tweaks application</p></div>
 
-                        {/* Main Download Card + Stats in one row */}
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                            <div className="col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 p-6">
+                        {/* Main Download Card + Stats */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                            <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 p-4 md:p-6">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
-                                <div className="relative flex items-center gap-5">
-                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30"><svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
+                                <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+                                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30"><svg className="w-7 h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
                                     <div className="flex-1">
-                                        <h2 className="text-xl font-bold text-white">Dashy Tweaks</h2>
+                                        <h2 className="text-lg md:text-xl font-bold text-white">Dashy Tweaks</h2>
                                         <p className="text-neutral-400 text-sm">v1.3.0 • Windows 10/11 • ~45 MB</p>
                                     </div>
-                                    <a href="https://github.com/Shoczy/dashy-tweaks-tauri/releases/latest/download/Dashy.Tweaks_1.3.0_x64-setup.exe" className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 rounded-xl font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all">
+                                    <a href="https://github.com/Shoczy/dashy-tweaks-tauri/releases/latest/download/Dashy.Tweaks_1.3.0_x64-setup.exe" className="inline-flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-emerald-500 hover:bg-emerald-400 rounded-xl font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all text-sm md:text-base mt-3 sm:mt-0">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                         Download
                                     </a>
                                 </div>
                             </div>
-                            <div className="grid grid-rows-2 gap-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4">
                                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center"><svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
                                     <div><p className="text-lg font-bold text-white">270+</p><p className="text-xs text-neutral-500">Tweaks</p></div>
@@ -537,7 +563,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* Features + Requirements side by side */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="rounded-2xl bg-white/5 border border-white/5 p-5">
                                 <h3 className="font-semibold text-white mb-3 text-sm">Features</h3>
                                 <div className="space-y-2">
