@@ -773,8 +773,8 @@ export default function Dashboard() {
                                     <div className="col-span-2 pt-4 border-t border-white/5">
                                         <p className="text-sm text-neutral-500 mb-2">Discord Role</p>
                                         <div className="flex items-center gap-2">
-                                            <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${license.plan === 'lifetime' ? 'bg-amber-500/20 text-amber-400' : 'bg-[#5865F2]/20 text-[#5865F2]'}`}>
-                                                {license.plan === 'lifetime' ? '👑 Lifetime' : '⭐ Monthly'}
+                                            <span className={`px-3 py-1.5 rounded text-sm font-medium ${license.plan === 'lifetime' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                                {license.plan === 'lifetime' ? '「Lifetime」' : '「Monthly」'}
                                             </span>
                                             <span className="text-xs text-neutral-500">Synced with Discord</span>
                                         </div>
