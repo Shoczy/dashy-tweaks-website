@@ -207,7 +207,7 @@ function TicketsTab({ userId }: { userId?: string }) {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm text-neutral-400 mb-2">Category</label>
-                                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50">
+                                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full px-4 py-3 bg-zinc-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 [&>option]:bg-zinc-800 [&>option]:text-white">
                                     <option value="general">General Support</option>
                                     <option value="technical">Technical Issue</option>
                                     <option value="billing">Billing</option>
