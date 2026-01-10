@@ -37,9 +37,9 @@ export default function Home() {
                         270+ Professional Tweaks
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                    <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight animate-fadeIn">
                         Optimize Your
-                        <span className="block bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
+                        <span className="block bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent animate-slideUp">
                             Gaming Performance
                         </span>
                     </h1>

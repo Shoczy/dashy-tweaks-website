@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 // Partner logos from /public/partners/ folder
 // Add your partner logos as PNG files: partner1.png, partner2.png, etc.
 const partners = [
-    { name: 'Partner 1', logo: '/partners/partner1.png' },
+    { name: 'XGEAR', logo: '/partners/partner1.png' },
 ]
 
 export default function PartnerSlider() {
@@ -49,13 +49,16 @@ export default function PartnerSlider() {
                         {[...partners, ...partners].map((partner, i) => (
                             <div
                                 key={i}
-                                className="flex-shrink-0 flex items-center justify-center h-12 w-32 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                                className="flex-shrink-0 flex flex-col items-center justify-center w-32 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                             >
-                                <img
-                                    src={partner.logo}
-                                    alt={partner.name}
-                                    className="max-h-full max-w-full object-contain filter invert"
-                                />
+                                <div className="h-12 flex items-center justify-center">
+                                    <img
+                                        src={partner.logo}
+                                        alt={partner.name}
+                                        className="max-h-full max-w-full object-contain filter invert"
+                                    />
+                                </div>
+                                <p className="text-xs text-neutral-400 mt-2 whitespace-nowrap">{partner.name}</p>
                             </div>
                         ))}
                     </div>

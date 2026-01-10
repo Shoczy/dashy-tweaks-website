@@ -118,10 +118,10 @@ export default function StatsCounter() {
                 <div className="flex items-center justify-center gap-2 mb-1">
                     <Download className="w-4 h-4 text-emerald-400 opacity-0 group-hover:opacity-100 transition" />
                     <p className="text-2xl font-bold text-emerald-400">
-                        {displayStats.downloads > 0 ? formatNumber(displayStats.downloads) : '+30%'}
+                        {formatNumber(displayStats.downloads)}+
                     </p>
                 </div>
-                <p className="text-neutral-500">{displayStats.downloads > 0 ? 'Downloads' : 'FPS Boost'}</p>
+                <p className="text-neutral-500">Downloads</p>
             </div>
         </div>
     )
