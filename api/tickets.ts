@@ -12,7 +12,7 @@ export default async function handler(req: any, res: any) {
 
     if (req.method === 'OPTIONS') return res.status(200).end()
 
-    const { action, userId, ticketId, subject, category, message, status } = req.body || {}
+    const { action, userId, ticketId, subject, category, message } = req.body || {}
 
     try {
         // GET TICKETS

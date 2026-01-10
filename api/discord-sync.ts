@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
 
             // Add new role
-            if (roleToAdd) {
+            if (roleToAdd && license) {
                 const addResponse = await fetch(
                     `https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${profile.discord_id}/roles/${roleToAdd}`,
                     {
