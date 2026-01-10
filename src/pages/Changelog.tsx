@@ -2,8 +2,22 @@ import { Link } from 'react-router-dom'
 
 const changelog = [
     {
-        version: '1.2.0',
+        version: '1.3.0',
         date: '2026-01-10',
+        type: 'major',
+        changes: [
+            { type: 'new', text: '24 Game Templates with optimized tweak presets' },
+            { type: 'new', text: 'Template filtering on all tweak pages (FPS, Input, Network, GPU, Mouse)' },
+            { type: 'new', text: 'Remember Me login option with auto-login' },
+            { type: 'improved', text: 'Expanded templates from 25 to 140 tweaks per game' },
+            { type: 'improved', text: 'Website now Discord-only purchase flow' },
+            { type: 'improved', text: 'Pricing page simplified to single Premium plan' },
+            { type: 'removed', text: 'Removed Free plan - Premium only' },
+        ]
+    },
+    {
+        version: '1.2.0',
+        date: '2026-01-09',
         type: 'major',
         changes: [
             { type: 'new', text: 'Added Discord Giveaway System with live entry counter' },
