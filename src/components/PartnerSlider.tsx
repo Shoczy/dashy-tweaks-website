@@ -42,11 +42,11 @@ export default function PartnerSlider() {
 
                     <div
                         ref={scrollRef}
-                        className="flex gap-16 overflow-hidden whitespace-nowrap"
+                        className="flex gap-16 overflow-hidden whitespace-nowrap justify-center"
                         style={{ scrollBehavior: 'auto' }}
                     >
-                        {/* Double the items for seamless loop */}
-                        {[...partners, ...partners].map((partner, i) => (
+                        {/* Show partners - duplicate only if more than 2 for seamless loop */}
+                        {(partners.length > 2 ? [...partners, ...partners] : partners).map((partner, i) => (
                             <div
                                 key={i}
                                 className="flex-shrink-0 flex flex-col items-center justify-center w-32 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
@@ -55,7 +55,7 @@ export default function PartnerSlider() {
                                     <img
                                         src={partner.logo}
                                         alt={partner.name}
-                                        className="max-h-full max-w-full object-contain filter invert"
+                                        className="max-h-full max-w-full object-contain"
                                     />
                                 </div>
                                 <p className="text-xs text-neutral-400 mt-2 whitespace-nowrap">{partner.name}</p>

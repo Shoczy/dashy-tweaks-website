@@ -9,7 +9,7 @@ interface Stats {
 }
 
 export default function StatsCounter() {
-    const [stats, setStats] = useState<Stats>({ users: 10000, downloads: 0, tweaks: 270 })
+    const [stats, setStats] = useState<Stats>({ users: 0, downloads: 0, tweaks: 270 })
     const [displayStats, setDisplayStats] = useState<Stats>({ users: 0, downloads: 0, tweaks: 0 })
     const [hasAnimated, setHasAnimated] = useState(false)
 
@@ -17,12 +17,11 @@ export default function StatsCounter() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Get active user count
-                const { count: userCount } = await supabase
+                // Get unique HWID count (real users who activated the app)
+                const { count: hwidCount } = await supabase
                     .from('licenses')
                     .select('*', { count: 'exact', head: true })
-                    .eq('is_active', true)
-                    .not('user_id', 'is', null)
+                    .not('hwid', 'is', null)
 
                 // Get download count
                 const { count: downloadCount } = await supabase
@@ -30,7 +29,7 @@ export default function StatsCounter() {
                     .select('*', { count: 'exact', head: true })
 
                 setStats({
-                    users: Math.max(10000, (userCount || 0) + 10000), // Base 10k + real users
+                    users: hwidCount || 0,
                     downloads: downloadCount || 0,
                     tweaks: 270
                 })
