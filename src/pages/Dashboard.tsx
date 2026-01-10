@@ -4,13 +4,235 @@ import { useAuth } from '../context/AuthContext'
 import { signOut, redeemLicense, linkDiscordAccount, unlinkDiscordAccount, updateProfileDiscord, supabase } from '../lib/supabase'
 
 const DISCORD = 'https://discord.gg/cXxFzBuG'
-type Tab = 'home' | 'download' | 'license' | 'settings' | 'status' | 'faq' | 'terms' | 'changelog'
+type Tab = 'home' | 'download' | 'license' | 'settings' | 'status' | 'faq' | 'terms' | 'changelog' | 'tickets'
 
 const DiscordIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
     <svg className={className} viewBox="0 0 127.14 96.36" fill="currentColor">
         <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
     </svg>
 )
+
+// Tickets Tab Component
+function TicketsTab({ userId }: { userId?: string }) {
+    const [tickets, setTickets] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [filter, setFilter] = useState<'all' | 'open' | 'pending' | 'closed'>('all')
+    const [showNewTicket, setShowNewTicket] = useState(false)
+    const [newSubject, setNewSubject] = useState('')
+    const [newMessage, setNewMessage] = useState('')
+    const [newCategory, setNewCategory] = useState('general')
+    const [creating, setCreating] = useState(false)
+    const [selectedTicket, setSelectedTicket] = useState<any>(null)
+    const [ticketMessages, setTicketMessages] = useState<any[]>([])
+    const [replyMessage, setReplyMessage] = useState('')
+    const [sending, setSending] = useState(false)
+
+    useEffect(() => {
+        if (userId) loadTickets()
+    }, [userId])
+
+    const loadTickets = async () => {
+        try {
+            const res = await fetch(`/api/tickets?userId=${userId}`)
+            const data = await res.json()
+            if (data.success) setTickets(data.tickets || [])
+        } catch (e) { console.error(e) }
+        setLoading(false)
+    }
+
+    const createTicket = async () => {
+        if (!newSubject.trim() || !newMessage.trim()) return
+        setCreating(true)
+        try {
+            const res = await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'create', userId, subject: newSubject, category: newCategory, message: newMessage })
+            })
+            const data = await res.json()
+            if (data.success) {
+                setShowNewTicket(false)
+                setNewSubject('')
+                setNewMessage('')
+                loadTickets()
+            }
+        } catch (e) { console.error(e) }
+        setCreating(false)
+    }
+
+    const openTicket = async (ticket: any) => {
+        setSelectedTicket(ticket)
+        try {
+            const res = await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get', ticketId: ticket.id })
+            })
+            const data = await res.json()
+            if (data.success) setTicketMessages(data.messages || [])
+        } catch (e) { console.error(e) }
+    }
+
+    const sendReply = async () => {
+        if (!replyMessage.trim() || !selectedTicket) return
+        setSending(true)
+        try {
+            await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reply', ticketId: selectedTicket.id, userId, message: replyMessage })
+            })
+            setReplyMessage('')
+            openTicket(selectedTicket)
+        } catch (e) { console.error(e) }
+        setSending(false)
+    }
+
+    const closeTicket = async () => {
+        if (!selectedTicket) return
+        try {
+            await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'close', ticketId: selectedTicket.id })
+            })
+            setSelectedTicket(null)
+            loadTickets()
+        } catch (e) { console.error(e) }
+    }
+
+    const filteredTickets = tickets.filter(t => filter === 'all' || t.status === filter)
+
+    const statusColors: Record<string, string> = {
+        open: 'bg-emerald-500/20 text-emerald-400',
+        pending: 'bg-amber-500/20 text-amber-400',
+        closed: 'bg-zinc-500/20 text-zinc-400'
+    }
+
+    if (selectedTicket) {
+        return (
+            <div className="p-8 max-w-4xl mx-auto">
+                <button onClick={() => setSelectedTicket(null)} className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white mb-6">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    Back to Tickets
+                </button>
+                <div className="flex items-start justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-white mb-2">{selectedTicket.subject}</h1>
+                        <div className="flex items-center gap-3">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[selectedTicket.status]}`}>{selectedTicket.status}</span>
+                            <span className="text-sm text-neutral-500">{selectedTicket.category}</span>
+                            <span className="text-sm text-neutral-500">{new Date(selectedTicket.created_at).toLocaleDateString('de-DE')}</span>
+                        </div>
+                    </div>
+                    {selectedTicket.status !== 'closed' && (
+                        <button onClick={closeTicket} className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition">Close Ticket</button>
+                    )}
+                </div>
+                <div className="space-y-4 mb-6">
+                    {ticketMessages.map((msg, i) => (
+                        <div key={i} className={`p-4 rounded-xl ${msg.is_staff ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-white/5 border border-white/10'}`}>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className={`text-sm font-medium ${msg.is_staff ? 'text-emerald-400' : 'text-white'}`}>{msg.is_staff ? 'Staff' : msg.profiles?.username || 'You'}</span>
+                                <span className="text-xs text-neutral-500">{new Date(msg.created_at).toLocaleString('de-DE')}</span>
+                            </div>
+                            <p className="text-neutral-300 text-sm whitespace-pre-wrap">{msg.message}</p>
+                        </div>
+                    ))}
+                </div>
+                {selectedTicket.status !== 'closed' && (
+                    <div className="flex gap-3">
+                        <textarea value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)} placeholder="Type your reply..." className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-neutral-500 resize-none focus:outline-none focus:border-emerald-500/50" rows={3} />
+                        <button onClick={sendReply} disabled={sending || !replyMessage.trim()} className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 rounded-xl text-white font-medium transition">{sending ? 'Sending...' : 'Send'}</button>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <div className="p-8 max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Support Tickets</h1>
+                    <p className="text-neutral-500">View and manage your support requests</p>
+                </div>
+                <button onClick={() => setShowNewTicket(true)} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 rounded-xl text-white font-medium transition">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    New Ticket
+                </button>
+            </div>
+
+            {/* Filter */}
+            <div className="flex gap-2 mb-6">
+                {(['all', 'open', 'pending', 'closed'] as const).map(f => (
+                    <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === f ? 'bg-emerald-500 text-white' : 'bg-white/5 text-neutral-400 hover:text-white'}`}>
+                        {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                    </button>
+                ))}
+            </div>
+
+            {/* Tickets List */}
+            {loading ? (
+                <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></div>
+            ) : filteredTickets.length === 0 ? (
+                <div className="text-center py-16">
+                    <svg className="w-16 h-16 mx-auto text-neutral-600 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                    <p className="text-neutral-500 mb-4">No tickets found</p>
+                    <button onClick={() => setShowNewTicket(true)} className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 rounded-xl text-white font-medium transition">Create Your First Ticket</button>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {filteredTickets.map(ticket => (
+                        <button key={ticket.id} onClick={() => openTicket(ticket)} className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-left transition">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-medium text-white">{ticket.subject}</h3>
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[ticket.status]}`}>{ticket.status}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-neutral-500">
+                                <span>{ticket.category}</span>
+                                <span>•</span>
+                                <span>{new Date(ticket.created_at).toLocaleDateString('de-DE')}</span>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* New Ticket Modal */}
+            {showNewTicket && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="w-full max-w-lg p-6 bg-zinc-900 border border-white/10 rounded-2xl">
+                        <h2 className="text-xl font-bold text-white mb-6">Create New Ticket</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-neutral-400 mb-2">Category</label>
+                                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50">
+                                    <option value="general">General Support</option>
+                                    <option value="technical">Technical Issue</option>
+                                    <option value="billing">Billing</option>
+                                    <option value="hwid">HWID Reset</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-neutral-400 mb-2">Subject</label>
+                                <input type="text" value={newSubject} onChange={(e) => setNewSubject(e.target.value)} placeholder="Brief description of your issue" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500/50" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-neutral-400 mb-2">Message</label>
+                                <textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Describe your issue in detail..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-neutral-500 resize-none focus:outline-none focus:border-emerald-500/50" rows={5} />
+                            </div>
+                        </div>
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={() => setShowNewTicket(false)} className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-medium transition">Cancel</button>
+                            <button onClick={createTicket} disabled={creating || !newSubject.trim() || !newMessage.trim()} className="flex-1 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 rounded-xl text-white font-medium transition">{creating ? 'Creating...' : 'Create Ticket'}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
 
 export default function Dashboard() {
     const { user, profile, license, loading, isPremium, refreshData } = useAuth()
@@ -33,10 +255,10 @@ export default function Dashboard() {
     useEffect(() => {
         const tab = searchParams.get('tab')
         const savedTab = localStorage.getItem('dashboard-tab')
-        if (tab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms', 'changelog'].includes(tab)) {
+        if (tab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms', 'changelog', 'tickets'].includes(tab)) {
             setActiveTab(tab as Tab)
             localStorage.setItem('dashboard-tab', tab)
-        } else if (savedTab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms', 'changelog'].includes(savedTab)) {
+        } else if (savedTab && ['home', 'download', 'license', 'settings', 'status', 'faq', 'terms', 'changelog', 'tickets'].includes(savedTab)) {
             setActiveTab(savedTab as Tab)
         }
         if (window.location.hash.includes('access_token')) {
@@ -176,6 +398,7 @@ export default function Dashboard() {
         { id: 'license', icon: 'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z', label: 'Redeem Key' },
     ]
     const supportItems = [
+        { id: 'tickets', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z', label: 'Support Tickets' },
         { id: 'changelog', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', label: 'Changelog' },
         { id: 'faq', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', label: 'FAQs' },
         { id: 'status', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: 'System Status' },
@@ -329,6 +552,11 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
+                )}
+
+                {/* Tickets Tab */}
+                {activeTab === 'tickets' && (
+                    <TicketsTab userId={user?.id} />
                 )}
 
                 {/* Changelog Tab */}

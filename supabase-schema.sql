@@ -102,3 +102,44 @@ CREATE INDEX IF NOT EXISTS idx_blacklist_discord ON blacklist(discord_id);
 
 -- RLS for blacklist (service role only)
 ALTER TABLE blacklist ENABLE ROW LEVEL SECURITY;
+
+
+-- Support Tickets table
+CREATE TABLE IF NOT EXISTS tickets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    subject TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'general',  -- general, technical, billing, hwid
+    status TEXT NOT NULL DEFAULT 'open',       -- open, pending, closed
+    priority TEXT DEFAULT 'normal',            -- low, normal, high
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    closed_at TIMESTAMPTZ
+);
+
+-- Ticket Messages table
+CREATE TABLE IF NOT EXISTS ticket_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES profiles(id),
+    message TEXT NOT NULL,
+    is_staff BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_tickets_user ON tickets(user_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
+CREATE INDEX IF NOT EXISTS idx_ticket_messages_ticket ON ticket_messages(ticket_id);
+
+-- RLS
+ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ticket_messages ENABLE ROW LEVEL SECURITY;
+
+-- Users can view their own tickets
+CREATE POLICY "Users can view own tickets" ON tickets FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can create tickets" ON tickets FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can view own ticket messages" ON ticket_messages FOR SELECT 
+    USING (ticket_id IN (SELECT id FROM tickets WHERE user_id = auth.uid()));
+CREATE POLICY "Users can create ticket messages" ON ticket_messages FOR INSERT 
+    WITH CHECK (ticket_id IN (SELECT id FROM tickets WHERE user_id = auth.uid()));
