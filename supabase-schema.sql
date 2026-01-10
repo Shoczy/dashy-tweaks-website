@@ -143,3 +143,17 @@ CREATE POLICY "Users can view own ticket messages" ON ticket_messages FOR SELECT
     USING (ticket_id IN (SELECT id FROM tickets WHERE user_id = auth.uid()));
 CREATE POLICY "Users can create ticket messages" ON ticket_messages FOR INSERT 
     WITH CHECK (ticket_id IN (SELECT id FROM tickets WHERE user_id = auth.uid()));
+
+
+-- Function to get live user count (active licenses in last 24h or total active)
+CREATE OR REPLACE FUNCTION get_live_user_count()
+RETURNS INTEGER AS $$
+BEGIN
+    RETURN (
+        SELECT COUNT(DISTINCT user_id)
+        FROM licenses
+        WHERE is_active = true
+        AND user_id IS NOT NULL
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
