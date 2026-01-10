@@ -157,3 +157,26 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- Downloads tracking table
+CREATE TABLE IF NOT EXISTS downloads (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    version TEXT DEFAULT '1.0.0',
+    source TEXT DEFAULT 'website',        -- website, github, discord
+    ip_hash TEXT,                         -- Hashed IP for unique counting
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for counting
+CREATE INDEX IF NOT EXISTS idx_downloads_created ON downloads(created_at);
+
+-- RLS - Allow inserts from API, reads for counting
+ALTER TABLE downloads ENABLE ROW LEVEL SECURITY;
+
+-- Allow anonymous inserts (for tracking)
+CREATE POLICY "Allow anonymous download tracking" ON downloads FOR INSERT WITH CHECK (true);
+
+-- Allow public read for count
+CREATE POLICY "Allow public download count" ON downloads FOR SELECT USING (true);

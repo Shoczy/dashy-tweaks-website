@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { signOut, linkDiscordAccount, unlinkDiscordAccount, updateProfileDiscord, supabase } from '../lib/supabase'
+import { RefreshCw, Shield } from 'lucide-react'
 
 const DiscordIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
     <svg className={className} viewBox="0 0 127.14 96.36" fill="currentColor">
@@ -17,6 +18,9 @@ export default function Settings() {
     const [discordLinked, setDiscordLinked] = useState<{ id: string, username: string | null, avatar: string | null } | null>(null)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
     const [deleting, setDeleting] = useState(false)
+    const [syncingRole, setSyncingRole] = useState(false)
+    const [updatingProfile, setUpdatingProfile] = useState(false)
+    const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
     useEffect(() => {
         if (!loading && !user) navigate('/')
@@ -67,6 +71,55 @@ export default function Settings() {
         setDiscordLinked(null)
         await refreshData()
         setUnlinkingDiscord(false)
+    }
+
+    const handleSyncRole = async () => {
+        if (!user) return
+        setSyncingRole(true)
+        setSyncMessage(null)
+        try {
+            const response = await fetch('/api/discord-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'sync-role', userId: user.id })
+            })
+            const data = await response.json()
+            if (data.success) {
+                setSyncMessage({
+                    type: 'success',
+                    text: data.role ? `✓ ${data.role} role synced!` : 'No active license to sync'
+                })
+            } else {
+                setSyncMessage({ type: 'error', text: data.error || 'Failed to sync role' })
+            }
+        } catch (error) {
+            setSyncMessage({ type: 'error', text: 'Failed to sync role' })
+        }
+        setSyncingRole(false)
+    }
+
+    const handleUpdateDiscordProfile = async () => {
+        if (!user) return
+        setUpdatingProfile(true)
+        setSyncMessage(null)
+        try {
+            const response = await fetch('/api/discord-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update-profile', userId: user.id })
+            })
+            const data = await response.json()
+            if (data.success) {
+                setDiscordLinked(prev => prev ? { ...prev, username: data.username, avatar: data.avatar } : null)
+                await refreshData()
+                setSyncMessage({ type: 'success', text: '✓ Discord profile updated!' })
+            } else {
+                setSyncMessage({ type: 'error', text: data.error || 'Failed to update profile' })
+            }
+        } catch (error) {
+            setSyncMessage({ type: 'error', text: 'Failed to update profile' })
+        }
+        setUpdatingProfile(false)
     }
 
     const handleDeleteAccount = async () => {
@@ -168,24 +221,56 @@ export default function Settings() {
                 <section className="mb-8 p-6 rounded-2xl bg-white/5 border border-white/10">
                     <h2 className="text-lg font-semibold text-white mb-4">Discord Connection</h2>
                     {discordLinked ? (
-                        <div className="flex items-center justify-between p-4 rounded-xl bg-[#5865F2]/10 border border-[#5865F2]/20">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-[#5865F2]/20 flex items-center justify-center">
-                                    <DiscordIcon className="w-5 h-5 text-[#5865F2]" />
+                        <>
+                            <div className="flex items-center justify-between p-4 rounded-xl bg-[#5865F2]/10 border border-[#5865F2]/20 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-[#5865F2]/20 flex items-center justify-center">
+                                        <DiscordIcon className="w-5 h-5 text-[#5865F2]" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-white">{discordLinked.username || 'Discord User'}</p>
+                                        <p className="text-xs text-neutral-400">ID: {discordLinked.id}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="font-medium text-white">{discordLinked.username || 'Discord User'}</p>
-                                    <p className="text-xs text-neutral-400">ID: {discordLinked.id}</p>
-                                </div>
+                                <button
+                                    onClick={handleUnlinkDiscord}
+                                    disabled={unlinkingDiscord}
+                                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition"
+                                >
+                                    {unlinkingDiscord ? 'Unlinking...' : 'Unlink'}
+                                </button>
                             </div>
-                            <button
-                                onClick={handleUnlinkDiscord}
-                                disabled={unlinkingDiscord}
-                                className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition"
-                            >
-                                {unlinkingDiscord ? 'Unlinking...' : 'Unlink'}
-                            </button>
-                        </div>
+
+                            {/* Sync Buttons */}
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                <button
+                                    onClick={handleSyncRole}
+                                    disabled={syncingRole}
+                                    className="flex items-center justify-center gap-2 p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-medium transition disabled:opacity-50"
+                                >
+                                    <Shield className={`w-4 h-4 ${syncingRole ? 'animate-pulse' : ''}`} />
+                                    {syncingRole ? 'Syncing...' : 'Sync Role'}
+                                </button>
+                                <button
+                                    onClick={handleUpdateDiscordProfile}
+                                    disabled={updatingProfile}
+                                    className="flex items-center justify-center gap-2 p-3 rounded-xl bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/20 text-[#5865F2] font-medium transition disabled:opacity-50"
+                                >
+                                    <RefreshCw className={`w-4 h-4 ${updatingProfile ? 'animate-spin' : ''}`} />
+                                    {updatingProfile ? 'Updating...' : 'Update Profile'}
+                                </button>
+                            </div>
+
+                            {/* Sync Message */}
+                            {syncMessage && (
+                                <div className={`p-3 rounded-lg text-sm ${syncMessage.type === 'success'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                    }`}>
+                                    {syncMessage.text}
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <button
                             onClick={handleLinkDiscord}
@@ -197,7 +282,7 @@ export default function Settings() {
                         </button>
                     )}
                     <p className="text-xs text-neutral-500 mt-3">
-                        Link your Discord to access premium features in our Discord server and get support.
+                        Link your Discord to sync your role (Monthly/Lifetime) and get support in our server.
                     </p>
                 </section>
 
@@ -220,10 +305,6 @@ export default function Settings() {
                                     {license.is_active ? 'Active' : 'Revoked'}
                                 </span>
                             </div>
-                            <div className="flex justify-between p-3 rounded-lg bg-black/30">
-                                <span className="text-neutral-400">HWID</span>
-                                <span className="text-white">{license.hwid ? 'Bound' : 'Not bound'}</span>
-                            </div>
                         </div>
                     </section>
                 )}
@@ -238,8 +319,8 @@ export default function Settings() {
                         onClick={handleDeleteAccount}
                         disabled={deleting}
                         className={`px-6 py-3 rounded-xl font-medium transition ${deleteConfirm
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
-                                : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
                             }`}
                     >
                         {deleting ? 'Deleting...' : deleteConfirm ? 'Click again to confirm' : 'Delete Account'}
