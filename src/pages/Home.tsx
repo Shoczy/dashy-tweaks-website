@@ -26,10 +26,10 @@ export default function Home() {
     return (
         <div className="relative">
             {/* Hero */}
-            <section className="min-h-[85vh] flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent" />
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+            <section className="min-h-[85vh] flex items-center justify-center relative overflow-hidden -mt-24 pt-24">
+                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-transparent" />
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
 
                 <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-sm text-emerald-400 mb-8">

@@ -346,13 +346,25 @@ export default function Dashboard() {
         setUnlinkingDiscord(false)
     }
     const handleSyncDiscordRole = async () => {
+        if (!user) return
         setSyncingRole(true)
-        console.log('Syncing Discord role...')
-        // TODO: Call Discord bot API to sync roles
-        await new Promise(r => setTimeout(r, 1000)) // Simulate API call
+        try {
+            const response = await fetch('/api/discord-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'sync-role', userId: user.id })
+            })
+            const data = await response.json()
+            if (data.success) {
+                alert(data.role ? `✓ ${data.role} role synced!` : 'No active license to sync')
+            } else {
+                alert(data.error || 'Failed to sync role')
+            }
+        } catch (error) {
+            alert('Failed to sync role')
+        }
         await refreshData()
         setSyncingRole(false)
-        alert('Role synced! (Bot integration coming soon)')
     }
     const handleUpdateDiscordProfile = async () => {
         setUpdatingProfile(true)
@@ -567,36 +579,37 @@ export default function Dashboard() {
                             <p className="text-neutral-500">Stay up to date with the latest updates</p>
                         </div>
                         <div className="space-y-6">
-                            {/* v1.2.0 */}
+                            {/* v1.3.0 */}
                             <div className="relative pl-8 pb-6 border-l-2 border-emerald-500/30">
                                 <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
                                 <div className="flex items-center gap-3 mb-3">
-                                    <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded">v1.2.0</span>
+                                    <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded">v1.3.0</span>
                                     <span className="text-sm text-neutral-500">10. Januar 2026</span>
                                     <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-medium rounded">LATEST</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">24 Game Templates mit optimierten Tweak-Presets</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Template-Filter auf allen Tweak-Seiten</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Remember Me Login mit Auto-Login</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Templates erweitert von 25 auf 140 Tweaks pro Spiel</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Website jetzt Discord-only Purchase Flow</span></div>
+                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded">REMOVED</span><span className="text-sm text-neutral-300">Free Plan entfernt - nur noch Monthly/Lifetime</span></div>
+                                </div>
+                            </div>
+
+                            {/* v1.2.0 */}
+                            <div className="relative pl-8 pb-6 border-l-2 border-white/10">
+                                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-white/20 ring-4 ring-white/5" />
+                                <div className="flex items-center gap-3 mb-3">
+                                    <span className="px-2 py-1 bg-white/10 text-white text-xs font-bold rounded">v1.2.0</span>
+                                    <span className="text-sm text-neutral-500">9. Januar 2026</span>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Discord Giveaway System mit Live Entry-Counter</span></div>
                                     <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">User Blacklist System für Admins</span></div>
                                     <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Neuer Payment Flow mit automatischer License Delivery</span></div>
                                     <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Ticket System zeigt jetzt Claim Button für Staff</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">License Info zeigt wer den Key redeemed hat</span></div>
                                     <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">FIXED</span><span className="text-sm text-neutral-300">Doppelter Ping in Ticket Channels behoben</span></div>
-                                </div>
-                            </div>
-
-                            {/* v1.1.0 */}
-                            <div className="relative pl-8 pb-6 border-l-2 border-white/10">
-                                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-white/20 ring-4 ring-white/5" />
-                                <div className="flex items-center gap-3 mb-3">
-                                    <span className="px-2 py-1 bg-white/10 text-white text-xs font-bold rounded">v1.1.0</span>
-                                    <span className="text-sm text-neutral-500">8. Januar 2026</span>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Discord Bot mit Components v2 Design</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">Ticket System für Käufe und Support</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">NEW</span><span className="text-sm text-neutral-300">HWID Reset Request System</span></div>
-                                    <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded">IMPROVED</span><span className="text-sm text-neutral-300">Dashboard Redesign mit neuer Sidebar</span></div>
                                 </div>
                             </div>
 
