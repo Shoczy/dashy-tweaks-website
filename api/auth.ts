@@ -99,10 +99,11 @@ export default async function handler(req: any, res: any) {
                     .update({ hwid })
                     .eq('id', license.id)
             } else if (hwid && license.hwid && license.hwid !== hwid) {
-                // HWID mismatch - could be account sharing
+                // HWID mismatch - user needs to request reset
                 return res.status(200).json({
                     success: false,
-                    error: 'This license is already activated on another device.'
+                    error: 'HWID_MISMATCH',
+                    message: 'This license is bound to another device. Request a HWID reset in Discord.'
                 })
             }
 
