@@ -300,8 +300,13 @@ export default function Dashboard() {
 
             if (discordIdentity) {
                 const discordData = discordIdentity.identity_data
+                // provider_id or sub contains the actual Discord user ID
+                const actualDiscordId = discordData?.provider_id || discordData?.sub
+                console.log('Discord identity data:', discordData)
+                console.log('Actual Discord ID:', actualDiscordId)
+
                 const discordInfo = {
-                    id: discordData?.provider_id || discordIdentity.id,
+                    id: actualDiscordId || discordIdentity.id,
                     username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
                     avatar: discordData?.avatar_url || null
                 }
@@ -374,8 +379,13 @@ export default function Dashboard() {
             const discordIdentity = freshUser.identities?.find(i => i.provider === 'discord')
             if (discordIdentity) {
                 const discordData = discordIdentity.identity_data
+                // provider_id contains the actual Discord user ID
+                const actualDiscordId = discordData?.provider_id || discordData?.sub
+                console.log('Discord identity data:', discordData)
+                console.log('Actual Discord ID:', actualDiscordId)
+
                 const result = await updateProfileDiscord(user!.id, {
-                    discord_id: discordData?.provider_id || discordIdentity.id,
+                    discord_id: actualDiscordId || null,
                     discord_username: discordData?.full_name || discordData?.name || discordData?.custom_claims?.global_name || null,
                     discord_avatar: discordData?.avatar_url || null
                 })

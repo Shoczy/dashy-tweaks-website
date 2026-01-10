@@ -27,10 +27,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { action, userId } = req.body
+        const { action, userId, discordId, discordUsername, discordAvatar } = req.body
 
         if (!userId) {
             return res.status(400).json({ error: 'User ID required' })
+        }
+
+        // Handle profile update (save discord info to profile)
+        if (discordId !== undefined) {
+            const { data: updatedProfile, error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    discord_id: discordId,
+                    discord_username: discordUsername,
+                    discord_avatar: discordAvatar
+                })
+                .eq('id', userId)
+                .select()
+                .single()
+
+            if (updateError) {
+                console.error('Profile update error:', updateError)
+                return res.status(500).json({ success: false, error: updateError.message })
+            }
+
+            return res.status(200).json({ success: true, profile: updatedProfile })
         }
 
         // Get user profile with discord_id
@@ -43,6 +64,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (profileError || !profile?.discord_id) {
             return res.status(400).json({ error: 'Discord not linked' })
         }
+
+        console.log('Discord ID from profile:', profile.discord_id)
 
         // Get user's license
         const { data: license } = await supabase
@@ -92,8 +115,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 )
 
                 if (!memberCheck.ok) {
-                    console.error('Member not found in guild:', await memberCheck.text())
-                    return res.status(400).json({ error: 'You are not in the Discord server. Please join first: https://discord.gg/cXxFzBuG' })
+                    const errorText = await memberCheck.text()
+                    console.error('Member not found in guild. Discord ID:', profile.discord_id, 'Error:', errorText)
+                    return res.status(400).json({
+                        error: `User not found in Discord server. Your linked Discord ID is: ${profile.discord_id}. Please make sure this matches your actual Discord account and that you are in the server.`,
+                        discord_id: profile.discord_id
+                    })
                 }
 
                 const addResponse = await fetch(
