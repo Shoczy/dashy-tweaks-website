@@ -4,11 +4,6 @@ import { useEffect, useRef } from 'react'
 // Add your partner logos as PNG files: partner1.png, partner2.png, etc.
 const partners = [
     { name: 'Partner 1', logo: '/partners/partner1.png' },
-    { name: 'Partner 2', logo: '/partners/partner2.png' },
-    { name: 'Partner 3', logo: '/partners/partner3.png' },
-    { name: 'Partner 4', logo: '/partners/partner4.png' },
-    { name: 'Partner 5', logo: '/partners/partner5.png' },
-    { name: 'Partner 6', logo: '/partners/partner6.png' },
 ]
 
 export default function PartnerSlider() {

@@ -90,7 +90,6 @@ export default function Layout() {
                                 <div className="space-y-2 text-sm text-neutral-500">
                                     <Link to="/privacy" className="block hover:text-white transition">Privacy</Link>
                                     <Link to="/terms" className="block hover:text-white transition">Terms</Link>
-                                    <Link to="/impressum" className="block hover:text-white transition">Impressum</Link>
                                 </div>
                             </div>
                             <div>
