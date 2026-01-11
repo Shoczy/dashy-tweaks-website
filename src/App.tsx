@@ -8,8 +8,17 @@ import Impressum from './pages/Impressum'
 import Dashboard from './pages/Dashboard'
 import Changelog from './pages/Changelog'
 import Settings from './pages/Settings'
+import Maintenance from './pages/Maintenance'
+
+// Set to true to enable maintenance mode
+const MAINTENANCE_MODE = true
 
 export default function App() {
+    // Show maintenance page if enabled
+    if (MAINTENANCE_MODE) {
+        return <Maintenance />
+    }
+
     return (
         <AuthProvider>
             <BrowserRouter>
